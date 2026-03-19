@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
 
     ENCRYPTION_KEY: str = Fernet.generate_key().decode()
-    HAMC_KEY: str = Fernet.generate_key().decode()
+    HMAC_KEY: str = Fernet.generate_key().decode()
 
     class Config:
         env_file = ".env"

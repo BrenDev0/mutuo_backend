@@ -18,4 +18,3 @@ class User(Base, TimeStampMixin):
     profile_type: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-
