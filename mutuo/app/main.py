@@ -1,10 +1,9 @@
-import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from mutuo.persistence.redis import RedisCacheStore
+from mutuo.cache.redis import RedisCacheStore
 from mutuo.settings import settings
 from mutuo.database.core import engine
 
