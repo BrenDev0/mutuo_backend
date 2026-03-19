@@ -18,7 +18,6 @@ class CacheStore(Protocol):
         ...
 
 
-
     async def get(
         self,
         key: str

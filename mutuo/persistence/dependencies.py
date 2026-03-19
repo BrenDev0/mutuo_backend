@@ -1,6 +1,6 @@
 import os 
 from .protocols import CacheStore
-from .redis.cache_store import RedisCacheStore
+from .redis import RedisCacheStore
 
 def get_external_cache_store() -> CacheStore:
     redis_url = os.getenv("REDIS_URL")

@@ -1,32 +1,57 @@
+import os
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
+from contextlib import asynccontextmanager
+from mutuo.persistence.redis import RedisCacheStore
+
+from .rate_limiter import RateLimiter
+from .exception_handler import ExceptionHandler
 from .api import router as api_router
+from .logging import configure_logger
 
-app = FastAPI()
+configure_logger()
 
-ALLOWED_ORIGINS = []
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    connection_url = os.getenv("REDIS_URL")
+    cache_store = RedisCacheStore(connection_url)
+    app.state.cache_store = cache_store
+    
+    try:
+        yield
+    finally:
+        await cache_store.close_connection()
+
+app = FastAPI(lifespan=lifespan)
+
+ALLOWED_ORIGINS = ["http://localhost:8000"]
 
 app.add_middleware(
     CORSMiddleware,
-    allowed_methods="*",
-    allowed_origins=ALLOWED_ORIGINS,
+    allow_methods="*",
+    allow_origins=ALLOWED_ORIGINS,
     allow_headers=["*"]
 )
 
+app.add_middleware(ExceptionHandler)
 
-@app.exception_handler(Exception)
-def exception_handler(
-    request: Request,
-    exc: Union[Exception]
-):
-    pass
+app.add_middleware(
+    RateLimiter,
+    limit=50,
+    window_seconds=60
+)
+
 
 app.include_router(api_router, prefix="/api/v1")
 
 
-
+@app.get("/health", status_code=200)
+def health_check():
+    return {
+        "status": "Mutuo ok"
+    }
 
 
 
