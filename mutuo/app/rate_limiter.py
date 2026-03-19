@@ -1,9 +1,22 @@
-from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import Response
+from starlette.types import ASGIApp
 
 
 class RateLimiter(BaseHTTPMiddleware):
+    def __init__(
+        self,
+        app: ASGIApp,
+        limit: int,
+        window_seconds: int
+    ):
+        super().__init__(app)
+        
+        self._limit = limit
+        self._window = window_seconds
+
     async def dispatch(
         self, 
         request: Request, 
@@ -11,7 +24,7 @@ class RateLimiter(BaseHTTPMiddleware):
     ) -> Response:
         cache_store = request.app.state.cache_store
 
-        ip = self._get_client_ip(request=Request)
+        ip = self._get_client_ip(request)
 
         request_count_key = f"ratelimit:count:{ip}"
         blocked_ip_key = f"ratelimit:block:{ip}"
@@ -26,10 +39,10 @@ class RateLimiter(BaseHTTPMiddleware):
         count = await cache_store.increment(key=request_count_key)
 
         if count == 1:
-            await cache_store.expire(key=request_count_key, seconds=60)
+            await cache_store.expire(key=request_count_key, seconds=self._window)
 
 
-        if count > 100:
+        if count > self._limit:
             await cache_store.set(
                 key=blocked_ip_key,
                 value=1,
@@ -44,7 +57,7 @@ class RateLimiter(BaseHTTPMiddleware):
         return await call_next(request)
     
     
-    def _get_client_ip(request: Request) -> str:
+    def _get_client_ip(self, request: Request) -> str:
         ip = "unknown"
         forwarded = request.headers.get("x-forwarded-for")
 
