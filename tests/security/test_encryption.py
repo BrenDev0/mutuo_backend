@@ -1,14 +1,6 @@
 import pytest
 from mutuo.security.encryption import decrypt, encrypt
-import os
-from cryptography.fernet import Fernet
-
-
-@pytest.fixture(autouse=True)
-def set_env():
-    os.environ["ENCRYPTION_KEY"] = Fernet.generate_key().decode()
-
-
+from mutuo.settings import settings
 def test_encrypt_decrypt_string():
     data = "test_string"
     encrypted = encrypt(data)

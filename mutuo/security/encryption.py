@@ -1,13 +1,11 @@
 import os
 from typing import Callable, Union
 from cryptography.fernet import Fernet
+from mutuo.settings import settings
 
 
 def get_fernet() -> Fernet:
-    key = os.getenv("ENCRYPTION_KEY")
-    if key is None:
-        raise ValueError("Encryption variables not set")
-    return Fernet(key)
+    return Fernet(settings.ENCRYPTION_KEY)
 
 
 def encrypt(data: str | int) -> str:
