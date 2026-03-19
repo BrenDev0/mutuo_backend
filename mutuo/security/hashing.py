@@ -21,8 +21,9 @@ def compare_hash(
     return bcrypt.checkpw(unhashed.encode('utf-8'), hashed.encode('utf-8'))
 
 
-type HashFn = Callable[[str], str]
-type CompareHashFn = Callable[[str, str], bool]
-type DeterministicHashFn = Callable[[str], str]
+
+HashFn = Callable[[str], str]
+CompareHashFn = Callable[[str, str], bool]
+DeterministicHashFn = Callable[[str], str]
 
             

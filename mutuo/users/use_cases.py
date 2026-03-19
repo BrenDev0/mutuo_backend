@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mutuo.security.hashing import DeterministicHashFn, HashFn, CompareHashFn
 from mutuo.security.encryption import EncryptFn, DecryptFn
+from mutuo.exceptions import UnauthorizedException
 
 from .models import User
 from .service import create, get_by_email_hash
@@ -46,6 +47,7 @@ async def create_user(
         decryption=decryption
     )
 
+
 async def login(
     db: AsyncSession,
     deterministic_hash: DeterministicHashFn,
@@ -60,5 +62,19 @@ async def login(
     )
 
     if not user_exists:
-        raise FileNotFoundError("User not found")
+        raise UnauthorizedException("Incorrect email or password")
+    
+    password_ok = compare_hash(
+        unhashed=credencials.password,
+        hashed=user_exists.password
+    )
+
+    if not password_ok:
+        raise UnauthorizedException(detail="Incorrect email or password")
+    
+    return get_public_schema(user=user_exists)
+
+
+
+
     
