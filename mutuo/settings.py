@@ -9,6 +9,12 @@ class Settings(BaseSettings):
     ENV: str = "local"
     DEBUG: bool = True
 
+
+    SESSION_MAX_AGE: int = 60 * 60 * 24 * 3 # days default
+    USER_CACHE_MAX_AGE: int = 60 * 5
+    MAX_VERIFICATION_ATTEMPTS: int = 3
+    MAX_LOGIN_ATTEMPS: int = 5
+
     RATELIMIT: int = 50
     RATE_LIMIT_WINDOW: int = 60
 

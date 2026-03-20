@@ -22,8 +22,3 @@ class CreateUser(MutuoSchemaBase):
     profile_type: str
     password: str
     verification_code: int
-
-
-class UserLogin(MutuoSchemaBase):
-    email: str
-    password: str

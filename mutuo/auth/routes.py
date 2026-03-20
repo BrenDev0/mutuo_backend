@@ -1,45 +1,34 @@
 from fastapi import APIRouter, Request, Response
 
-from mutuo.security.encryption import encrypt, decrypt
-from mutuo.security.hashing import hash, deterministic_hash
 from mutuo.settings import settings
-from mutuo.auth.schemas import SessionContext
-from mutuo.auth.usecases import create_session
+from mutuo.users.schemas import UserPublic
+from mutuo.users.service import get_by_email_hash
+from mutuo.security.hashing import deterministic_hash, compare_hash
+from mutuo.security.encryption import decrypt
 
-from .schemas import CreateUser,  UserPublic
-from .usecases import (
-    create_user
-)
-from .service import (
-    create
-)
-
+from .schemas import LoginCredentials, SessionContext
+from .usecases import login, create_session
 
 router = APIRouter(
-    tags=["Users"]
+    tags=["Auth"]
 )
 
-
-@router.post("", status_code=201, response_model=UserPublic)
-async def users_create(
+@router.post("/login", status_code=200, response_model=UserPublic)
+async def auth_login(
     request: Request,
     response: Response,
-    data: CreateUser
+    data: LoginCredentials
 ):
-    cache_store = request.app.state.cache_store
-
-    new_user = await create_user(
+    user = await login(
         db=request.state.db,
-        user_in=data,
-        encryption=encrypt,
-        decryption=decrypt,
-        hash=hash,
         deterministic_hash=deterministic_hash,
-        create_fn=create,
-        cache_store=cache_store
+        compare_hash=compare_hash,
+        decryption=decrypt,
+        credentials=data,
+        get_by_email_hash_fn=get_by_email_hash
     )
 
-   
+    cache_store = request.app.state.cache_store
     ip = getattr(request.state, "ip", None)
     client_agent=request.headers.get("user-agent")
     
@@ -51,7 +40,7 @@ async def users_create(
     session_id = await create_session(
         session_context=session_context,
         cache_store=cache_store,
-        user=new_user
+        user=user
     )
 
     
@@ -64,11 +53,5 @@ async def users_create(
         httponly=True,
         samesite="lax"
     )
-
-    return new_user
-
-
-
-
-
     
+    return user

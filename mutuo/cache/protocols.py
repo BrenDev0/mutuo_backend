@@ -1,4 +1,4 @@
-from typing import Protocol, Dict, Any
+from typing import Protocol, Any
 
 
 class CacheStore(Protocol):

@@ -27,8 +27,8 @@ class RedisCacheStore(CacheStore):
     async def increment(self, key: str) -> int:
         return await self._redis.incr(key)
 
-    async def expire(self, key: str, seconds: int) -> None:
-        await self._redis.expire(key, seconds)
+    async def expire(self, key: str, expire_seconds: int) -> None:
+        await self._redis.expire(key, expire_seconds)
 
     async def close_connection(self):
         await self._redis.close()

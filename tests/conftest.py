@@ -6,6 +6,10 @@ from unittest.mock import AsyncMock, Mock
 def db():
     return AsyncMock()
 
+@pytest.fixture
+def mock_cache_store():
+    return AsyncMock()
+
 
 @pytest.fixture
 def security_mocks():

@@ -25,10 +25,11 @@ class ExceptionHandler(BaseHTTPMiddleware):
                 content={"detail": [{"msg": e.detail}]}
             )
         
-        except Exception:
+        except Exception as e:
             error =  {
                 "endpoint": request.url,
-                "method": request.method
+                "method": request.method,
+                "error": str(e)
             }
             
             logger.error(str(error))

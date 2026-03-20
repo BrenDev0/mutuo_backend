@@ -55,6 +55,8 @@ class RateLimiter(BaseHTTPMiddleware):
                 status_code=429
             )
         
+        request.state.ip = ip
+        
         return await call_next(request)
     
     
