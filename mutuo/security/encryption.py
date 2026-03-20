@@ -1,4 +1,3 @@
-import os
 from typing import Callable, Union
 from cryptography.fernet import Fernet
 from mutuo.settings import settings

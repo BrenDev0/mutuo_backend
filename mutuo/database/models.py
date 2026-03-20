@@ -7,4 +7,4 @@ class Base(DeclarativeBase):
     pass
 
 class TimeStampMixin:
-    created_at: Mapped[DateTime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))

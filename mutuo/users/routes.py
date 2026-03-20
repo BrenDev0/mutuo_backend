@@ -3,8 +3,11 @@ from fastapi import APIRouter, Request, Body
 from  mutuo.security.encryption import encrypt, decrypt
 from mutuo.security.hashing import hash, deterministic_hash
 
-from .schemas import CreateUser, UserLogin, UserPublic
-from .use_cases import create_user, login
+from .schemas import CreateUser,  UserPublic
+from .usecases import create_user
+from .service import (
+    create
+)
 
 
 router = APIRouter(
@@ -13,7 +16,7 @@ router = APIRouter(
 
 
 @router.post("", status_code=201, response_model=UserPublic)
-async def create(
+async def users_create(
     request: Request,
     data: CreateUser = Body(...)
 ):
@@ -23,7 +26,8 @@ async def create(
         encryption=encrypt,
         decryption=decrypt,
         hash=hash,
-        deterministic_hash=deterministic_hash
+        deterministic_hash=deterministic_hash,
+        create_fn=create
     )
 
 

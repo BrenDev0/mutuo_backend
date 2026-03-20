@@ -5,7 +5,7 @@ class CacheStore(Protocol):
     async def set(
         self,
         key: str,
-        value: Dict[str, Any],
+        value: Any,
         expire_seconds: int
     ) -> None:
         ...
@@ -21,7 +21,7 @@ class CacheStore(Protocol):
     async def get(
         self,
         key: str
-    ) -> Dict[str, Any] | None:
+    ) -> Any | None:
         ...
 
 

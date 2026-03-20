@@ -1,4 +1,3 @@
-import pytest
 from mutuo.security.hashing import hash, deterministic_hash, compare_hash
 
 
@@ -30,7 +29,7 @@ def test_compare_match():
         hashed_data
     )
 
-    assert result == True
+    assert result
 
 def test_compare_no_match():
     data = "hello"
@@ -41,4 +40,4 @@ def test_compare_no_match():
         hashed_data
     )
 
-    assert result == False
+    assert not result 

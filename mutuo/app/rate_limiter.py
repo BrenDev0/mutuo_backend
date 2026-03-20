@@ -3,6 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
+from mutuo.cache.protocols import CacheStore
 
 
 class RateLimiter(BaseHTTPMiddleware):
@@ -22,7 +23,7 @@ class RateLimiter(BaseHTTPMiddleware):
         request: Request, 
         call_next: RequestResponseEndpoint
     ) -> Response:
-        cache_store = request.app.state.cache_store
+        cache_store: CacheStore = request.app.state.cache_store
 
         ip = self._get_client_ip(request)
 
@@ -39,7 +40,7 @@ class RateLimiter(BaseHTTPMiddleware):
         count = await cache_store.increment(key=request_count_key)
 
         if count == 1:
-            await cache_store.expire(key=request_count_key, seconds=self._window)
+            await cache_store.expire(key=request_count_key, expire_seconds=self._window)
 
 
         if count > self._limit:

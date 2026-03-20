@@ -1,6 +1,7 @@
-import pytest
 from mutuo.security.encryption import decrypt, encrypt
-from mutuo.settings import settings
+
+
+
 def test_encrypt_decrypt_string():
     data = "test_string"
     encrypted = encrypt(data)

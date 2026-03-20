@@ -1,14 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Callable, Awaitable
 
 from mutuo.security.hashing import DeterministicHashFn, HashFn, CompareHashFn
 from mutuo.security.encryption import EncryptFn, DecryptFn
 from mutuo.exceptions import UnauthorizedException
 
 from .models import User
-from .service import create, get_by_email_hash
 from .schemas import CreateUser, UserPublic, UserLogin
 
-def get_public_schema(
+def _get_public_schema(
     user: User,
     decryption: DecryptFn
 ) -> UserPublic:
@@ -20,13 +20,18 @@ def get_public_schema(
         created_at=user.created_at
     )
 
+
+CreateUserFn = Callable[[AsyncSession, User], Awaitable[User]]
+GetByEmailHashFn = Callable[[AsyncSession, str], Awaitable[User | None]]
+
 async def create_user(
     db: AsyncSession,
     user_in: CreateUser,
     encryption: EncryptFn,
     decryption: DecryptFn,
     hash: HashFn,
-    deterministic_hash: DeterministicHashFn
+    deterministic_hash: DeterministicHashFn,
+    create_fn: CreateUserFn
 ) -> UserPublic:
     prepared_data = User(
         name=encryption(user_in.name),
@@ -36,13 +41,13 @@ async def create_user(
         profile_type=user_in.profile_type
     )
 
-    new_user = await create(
-        db=db,
-        user_in=prepared_data
+    new_user = await create_fn(
+        db,
+        prepared_data
     )
 
 
-    return get_public_schema(
+    return _get_public_schema(
         user=new_user,
         decryption=decryption
     )
@@ -52,27 +57,29 @@ async def login(
     db: AsyncSession,
     deterministic_hash: DeterministicHashFn,
     compare_hash: CompareHashFn,
-    credencials: UserLogin
+    decrryption: DecryptFn,
+    credencials: UserLogin,
+    get_by_email_hash_fn: GetByEmailHashFn
 ):
     hashed_email = deterministic_hash(credencials.email)
 
-    user_exists = await get_by_email_hash(
-        db=db,
-        email_hash=hashed_email
+    user_exists = await get_by_email_hash_fn(
+        db,
+        hashed_email
     )
 
     if not user_exists:
         raise UnauthorizedException("Incorrect email or password")
     
     password_ok = compare_hash(
-        unhashed=credencials.password,
-        hashed=user_exists.password
+        credencials.password,
+        user_exists.password
     )
 
     if not password_ok:
         raise UnauthorizedException(detail="Incorrect email or password")
     
-    return get_public_schema(user=user_exists)
+    return _get_public_schema(user=user_exists, decryption=decrryption)
 
 
 
