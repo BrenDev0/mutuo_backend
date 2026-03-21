@@ -45,7 +45,7 @@ async def _handle_verification(
     
     attemps = await cache_store.increment(attempts_key)
 
-    if attemps > settings.MAX_VERIFICATION_ATTEMPTS:
+    if attemps >= settings.MAX_VERIFICATION_ATTEMPTS:
         await asyncio.gather(
             cache_store.delete(verification_key),
             cache_store.delete(attempts_key),

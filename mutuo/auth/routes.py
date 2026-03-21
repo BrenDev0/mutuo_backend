@@ -5,6 +5,7 @@ from mutuo.users.schemas import UserPublic
 from mutuo.users.service import get_by_email_hash
 from mutuo.security.hashing import deterministic_hash, compare_hash
 from mutuo.security.encryption import decrypt
+from mutuo.cache.protocols import CacheStore
 
 from .schemas import LoginCredentials, SessionContext
 from .usecases import login, create_session
@@ -55,3 +56,21 @@ async def auth_login(
     )
     
     return user
+
+
+@router.post("/logout", status_code=200)
+async def auth_logout(
+    request: Request,
+    response: Response
+):
+    session_id = request.cookies.get("session_id")
+
+    cache_store: CacheStore = request.app.state.cache_store
+    await cache_store.delete(str(session_id))
+
+    response.delete_cookie(
+        key="session_id",
+        path="/"
+    )
+
+    return {"detail": [{"msg": "Logout successfull"}]}
