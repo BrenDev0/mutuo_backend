@@ -27,6 +27,15 @@ class SecurityMocks:
 def security_mocks():
     return  SecurityMocks()
 
+
+@pytest.fixture
+def mock_request():
+    return Mock()
+
+@pytest.fixture
+def mock_response():
+    return Mock()
+
 user_id = uuid4()
 @pytest.fixture
 def mock_user_public():

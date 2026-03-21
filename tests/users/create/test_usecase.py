@@ -10,18 +10,6 @@ def mock_create_fn():
     return AsyncMock()
 
 
-@pytest.fixture
-def mock_create_user_schema():
-    return CreateUser(
-        name="Carpincha Lucia",
-        email="carpincha@carpinchaCo.com",
-        password="chonchdeagua",
-        profile_type="PROPIETARIO",
-        verification_code=123
-    )
-
-
-
 @pytest.mark.asyncio
 async def test_success(
     db,

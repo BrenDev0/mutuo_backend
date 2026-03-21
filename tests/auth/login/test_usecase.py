@@ -1,24 +1,10 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from mutuo.auth.schemas import LoginCredentials, SessionContext
 from mutuo.auth.usecases import login
 from mutuo.users.schemas import UserPublic
 from mutuo.exceptions import UnauthorizedException
 
-@pytest.fixture
-def mock_credentials():
-    return LoginCredentials(
-        email="email",
-        password="password"
-    )
-
-@pytest.fixture
-def mock_context():
-    return SessionContext(
-        ip="1.1.1.1",
-        client_agent="client-agent"
-    )
 
 mock_get_by_email_fn = AsyncMock() 
 
@@ -104,8 +90,3 @@ async def test_incorrect_password(
         )
 
     assert "Incorrect email or password" in str(exc)
-
-
-
-
-    

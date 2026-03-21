@@ -1,7 +1,7 @@
 [project]
 name = "mutuo"
 version = "0.1.0"
-description = "Mutuo backen"
+description = "Mutuo backend"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
