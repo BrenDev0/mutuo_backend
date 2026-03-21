@@ -32,10 +32,10 @@ async def test_success(
     mock_cache_store
 ):
     
-    encryption = security_mocks["encryption"]
-    decryption = security_mocks["decryption"]
-    hash = security_mocks["hash"]
-    deterministic_hash = security_mocks["deterministic_hash"]
+    encryption = security_mocks.encryption
+    decryption = security_mocks.decryption
+    hash = security_mocks.hash_fn
+    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, 123]
 
     mock_create_fn.return_value = mock_user
@@ -67,10 +67,10 @@ async def test_incorrect_verification_code(
     mock_create_fn,
     db
 ):
-    encryption = security_mocks["encryption"]
-    decryption = security_mocks["decryption"]
-    hash = security_mocks["hash"]
-    deterministic_hash = security_mocks["deterministic_hash"]
+    encryption = security_mocks.encryption
+    decryption = security_mocks.decryption
+    hash = security_mocks.hash_fn
+    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, 1333]
     mock_cache_store.increment.return_value = 1
 
@@ -97,10 +97,10 @@ async def test_max_attemps_blocked(
     mock_create_fn,
     db
 ):
-    encryption = security_mocks["encryption"]
-    decryption = security_mocks["decryption"]
-    hash = security_mocks["hash"]
-    deterministic_hash = security_mocks["deterministic_hash"]
+    encryption = security_mocks.encryption
+    decryption = security_mocks.decryption
+    hash = security_mocks.hash_fn
+    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.return_value = 1
 
 
@@ -128,10 +128,10 @@ async def test_expired_code(
     mock_create_fn,
     db
 ):
-    encryption = security_mocks["encryption"]
-    decryption = security_mocks["decryption"]
-    hash = security_mocks["hash"]
-    deterministic_hash = security_mocks["deterministic_hash"]
+    encryption = security_mocks.encryption
+    decryption = security_mocks.decryption
+    hash = security_mocks.hash_fn
+    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, None]
 
 

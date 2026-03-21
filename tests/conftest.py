@@ -1,6 +1,11 @@
 import pytest
+from uuid import uuid4
+from typing import Callable
+from dataclasses import dataclass
 from unittest.mock import AsyncMock, Mock
-
+from datetime import datetime
+from mutuo.users.schemas import UserPublic
+from mutuo.users.models import User
 
 @pytest.fixture
 def db():
@@ -10,17 +15,37 @@ def db():
 def mock_cache_store():
     return AsyncMock()
 
-
-@pytest.fixture
-def security_mocks():
+@dataclass
+class SecurityMocks:
     encryption = Mock(side_effect=lambda x: f"enc({x})")
     decryption = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
     hash_fn = Mock(return_value="hashed_password")
+    compare_hash = Mock(return_value=True)
     deterministic_hash = Mock(return_value="hashed_email")
 
-    return {
-    "encryption": encryption,
-    "decryption": decryption,
-    "hash": hash_fn,
-    "deterministic_hash": deterministic_hash,
-}
+@pytest.fixture
+def security_mocks():
+    return  SecurityMocks()
+
+user_id = uuid4()
+@pytest.fixture
+def mock_user_public():
+    return UserPublic(
+        user_id=user_id,
+        name="Carpincha Lucia",
+        email="carpincha@carpinchaCo.com",
+        profile_type="PROPIETARIO",
+        created_at=datetime.now()
+    )
+
+@pytest.fixture
+def mock_user():
+    return User(
+        user_id=user_id,
+        name="Carpincha Lucia",
+        email="carpincha@carpinchaCo.com",
+        email_hash="hash",
+        password="hashed",
+        profile_type="PROPIETARIO",
+        created_at=datetime.now()
+    )
