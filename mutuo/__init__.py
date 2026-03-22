@@ -1,1 +1,1 @@
-from mutuo.users.models import User
+from mutuo.users.models import User #noqa: F401

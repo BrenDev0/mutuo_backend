@@ -14,7 +14,7 @@ from .usecases import (
 )
 from .service import (
     create,
-    delete_user
+    delete_by_id
 )
 
 
@@ -77,7 +77,7 @@ async def users_delete(
     response: Response,
     user: UserPublic = Depends(get_current_user)
 ):
-    deleted_user= await delete_user(
+    await delete_by_id(
         db=request.state.db,
         user_id=user.user_id
     )

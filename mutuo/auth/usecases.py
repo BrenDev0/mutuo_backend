@@ -54,11 +54,13 @@ async def delete_session(
     cache_store: CacheStore,
     session_id: UUID,
     user_id: UUID
-):
+) -> UUID:
     await asyncio.gather(
         cache_store.delete(str(session_id)),
         cache_store.delete(f"cache:user{user_id}")
     )
+
+    return session_id
 
 
 
@@ -69,7 +71,7 @@ async def login(
     decryption: DecryptFn,
     credentials: LoginCredentials,
     get_by_email_hash_fn: GetByEmailHashFn
-):
+) -> UserPublic:
     hashed_email = deterministic_hash(credentials.email)
 
     user_exists = await get_by_email_hash_fn(

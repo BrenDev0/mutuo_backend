@@ -35,7 +35,7 @@ async def get_by_email_hash(
     return result.scalar_one_or_none()
 
 
-async def delete_user(
+async def delete_by_id(
     db: AsyncSession,
     user_id: UUID
 ) -> User | None:
