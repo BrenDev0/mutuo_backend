@@ -12,7 +12,7 @@ def mock_verify_email_request():
 
 @pytest.mark.asyncio
 @patch("mutuo.auth.routes.send_email")
-@patch("mutuo.auth.routes.verify_email")
+@patch("mutuo.auth.routes.verify_email_onboarding")
 async def test_success(
     mock_verify_email,
     mock_request,
