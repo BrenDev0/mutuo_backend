@@ -1,4 +1,4 @@
-from mutuo.security.encryption import DecryptFn
+from mutuo.security.types import DecryptFn
 
 from .schemas import UserPublic
 from .models import User

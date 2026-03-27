@@ -25,3 +25,7 @@ class SessionContext:
     client_agent: Optional[str] = None
 
 
+class VerifyEmailRequest(MutuoSchemaBase):
+    email: str
+
+
