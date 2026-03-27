@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str = Fernet.generate_key().decode()
     HMAC_KEY: str = Fernet.generate_key().decode()
 
+    MAILER_HOST: str 
+    MAILER_PORT: int = 587
+    MAILER_USER: str
+    MAILER_PASSWORD: str
+
     class Config:
         env_file = ".env"
 
