@@ -1,5 +1,6 @@
 from uuid import UUID
 from datetime import datetime
+from typing import Optional
 
 from mutuo.schemas import MutuoSchemaBase
 from enum import StrEnum
@@ -14,11 +15,14 @@ class UserPublic(MutuoSchemaBase):
     email: str
     profile_type: str
     created_at: datetime
+    
+
+class UpdateUserRequest(MutuoSchemaBase):
+    name: Optional[str] = None
+    password: Optional[str] = None
+    current_password: Optional[str] = None
 
 
-class CreateUser(MutuoSchemaBase):
-    name: str
-    email: str
-    profile_type: str
-    password: str
-    verification_code: int
+
+    
+

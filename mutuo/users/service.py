@@ -1,5 +1,6 @@
 from uuid import UUID
-from sqlalchemy import select, delete
+from typing import Dict, Any
+from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User
@@ -30,6 +31,17 @@ async def get_by_email_hash(
     email_hash: str
 ) -> User | None: 
     stmt = select(User).where(User.email_hash == email_hash)
+    result = await db.execute(stmt)
+
+    return result.scalar_one_or_none()
+
+
+async def update_by_id(
+    db: AsyncSession,
+    user_id: UUID,
+    changes: Dict[str, Any]
+):
+    stmt = update(User).where(User.user_id == user_id).values(**changes).returning(User)
     result = await db.execute(stmt)
 
     return result.scalar_one_or_none()

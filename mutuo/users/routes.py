@@ -1,20 +1,18 @@
 from uuid import UUID
 from fastapi import APIRouter, Request, Response, Depends
 
-from mutuo.security.encryption import encrypt, decrypt
-from mutuo.security.hashing import hash, deterministic_hash
-from mutuo.settings import settings
-from mutuo.auth.schemas import SessionContext
-from mutuo.auth.usecases import create_session, delete_session
+from mutuo.auth.usecases import  delete_session
 from mutuo.auth.dependencies import get_current_user
+from mutuo.security.hashing import hash, compare_hash
+from mutuo.security.encryption import encrypt, decrypt
 
-from .schemas import CreateUser,  UserPublic
-from .usecases import (
-    create_user
-)
+from .schemas import  UserPublic, UpdateUserRequest
+from .usecases import update_user
+
 from .service import (
-    create,
-    delete_by_id
+    delete_by_id,
+    update_by_id,
+    get_by_id
 )
 
 
@@ -23,52 +21,24 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=201, response_model=UserPublic)
-async def users_create(
+
+@router.patch("/", status_code=200, response_model=UserPublic)
+async def users_update(
     request: Request,
-    response: Response,
-    data: CreateUser
+    data: UpdateUserRequest,
+    user: UserPublic = Depends(get_current_user)
 ):
-    cache_store = request.app.state.cache_store
-
-    new_user = await create_user(
+    return await update_user(
         db=request.state.db,
-        user_in=data,
-        encryption=encrypt,
-        decryption=decrypt,
+        user_id=user.user_id,
+        changes=data,
         hash=hash,
-        deterministic_hash=deterministic_hash,
-        create_fn=create,
-        cache_store=cache_store
+        compare_hash=compare_hash,
+        encrypt=encrypt,
+        decrypt=decrypt,
+        get_by_id=get_by_id,
+        update_user=update_by_id
     )
-
-   
-    ip = getattr(request.state, "ip", None)
-    client_agent=request.headers.get("user-agent")
-    
-    session_context = SessionContext(
-        ip=ip,
-        client_agent=client_agent
-    )
-
-    session_id = await create_session(
-        session_context=session_context,
-        cache_store=cache_store,
-        user=new_user
-    )
-
-    
-    response.set_cookie(
-        key="session_id",
-        value=str(session_id),
-        max_age=settings.SESSION_MAX_AGE,
-        path="/",
-        secure=True,
-        httponly=True,
-        samesite="lax"
-    )
-
-    return new_user
 
 
 @router.delete("", status_code=200, response_model=UserPublic)
