@@ -141,7 +141,7 @@ async def verify_email(
     )
 
     send_email(
-        email_message=email_message
+        email_message
     )
 
 

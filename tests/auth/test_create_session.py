@@ -1,6 +1,5 @@
 import pytest
 from uuid import UUID
-from unittest.mock import call
 from mutuo.auth.usecases import create_session
 
 
