@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, call
 
 from mutuo.users.schemas import UserPublic
-from mutuo.users.usecases import create_user
+from mutuo.auth.usecases import register_user_with_verification
 from mutuo.exceptions import UnauthorizedException
 
 @pytest.fixture
@@ -28,7 +28,7 @@ async def test_success(
 
     mock_create_fn.return_value = mock_user
 
-    result = await create_user(
+    result = await register_user_with_verification(
         db=db,
         user_in=mock_create_user_schema,
         encryption=encryption,
@@ -64,7 +64,7 @@ async def test_incorrect_verification_code(
 
 
     with pytest.raises(UnauthorizedException) as exc: 
-        await create_user(
+        await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
             encryption=encryption,
@@ -93,7 +93,7 @@ async def test_max_attemps_blocked(
 
 
     with pytest.raises(UnauthorizedException) as exc: 
-        await create_user(
+        await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
             encryption=encryption,
@@ -124,7 +124,7 @@ async def test_expired_code(
 
 
     with pytest.raises(UnauthorizedException) as exc: 
-        await create_user(
+        await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
             encryption=encryption,

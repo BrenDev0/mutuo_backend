@@ -1,5 +1,18 @@
 import pytest
 from mutuo.auth.schemas import LoginCredentials, SessionContext
+import pytest
+from mutuo.auth.schemas import RegisterUserRequest
+
+@pytest.fixture
+def mock_create_user_schema():
+    return RegisterUserRequest(
+        name="Carpincha Lucia",
+        email="carpincha@carpinchaCo.com",
+        password="chonchdeagua",
+        profile_type="PROPIETARIO",
+        verification_code=123
+    )
+
 
 
 @pytest.fixture

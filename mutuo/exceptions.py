@@ -5,6 +5,7 @@ class ErrorSlug(StrEnum):
     UNAUTHORIZED = "unauthorized"
     FORBIDDEN = "forbidden"
     CONFLICT = "conflict"
+    UNPROCESSABLE = "unprocessable"
 
 
 class MutuoException(Exception):
@@ -28,6 +29,12 @@ class ForbiddenException(MutuoException):
     def __init__(self, detail: str = "Forbidden"):
         super().__init__(detail=detail, slug=ErrorSlug.FORBIDDEN)
 
+
 class ConflictException(MutuoException):
     def __init__(self, detail: str = "Conflict"):
         super().__init__(detail=detail, slug=ErrorSlug.CONFLICT)
+
+
+class UnprocessableException(MutuoException):
+    def __init__(self, detail: str = "Bad request"):
+        super().__init__(detail=detail, slug=ErrorSlug.UNPROCESSABLE)
