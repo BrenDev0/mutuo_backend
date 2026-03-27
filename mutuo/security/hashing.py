@@ -1,6 +1,5 @@
 import bcrypt
 import hashlib
-from typing import Callable
 
 def deterministic_hash(data: str) -> str:
         bytes = data.lower().encode('utf-8')  
@@ -19,11 +18,5 @@ def compare_hash(
     hashed: str,
 ) -> bool:
     return bcrypt.checkpw(unhashed.encode('utf-8'), hashed.encode('utf-8'))
-
-
-
-HashFn = Callable[[str], str]
-CompareHashFn = Callable[[str, str], bool]
-DeterministicHashFn = Callable[[str], str]
 
             

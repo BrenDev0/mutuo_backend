@@ -2,7 +2,7 @@ import pytest
 from mutuo.users.routes import users_create
 from unittest.mock import patch
 from uuid import uuid4
-from mutuo.users.schemas import UserPublic, CreateUser
+from mutuo.users.schemas import UserPublic
 from mutuo.settings import settings
 from mutuo.auth.schemas import SessionContext
 

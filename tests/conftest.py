@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from typing import Callable
 from dataclasses import dataclass
 from unittest.mock import AsyncMock, Mock
 from datetime import datetime

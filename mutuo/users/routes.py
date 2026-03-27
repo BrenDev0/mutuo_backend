@@ -1,17 +1,20 @@
-from fastapi import APIRouter, Request, Response
+from uuid import UUID
+from fastapi import APIRouter, Request, Response, Depends
 
 from mutuo.security.encryption import encrypt, decrypt
 from mutuo.security.hashing import hash, deterministic_hash
 from mutuo.settings import settings
 from mutuo.auth.schemas import SessionContext
-from mutuo.auth.usecases import create_session
+from mutuo.auth.usecases import create_session, delete_session
+from mutuo.auth.dependencies import get_current_user
 
 from .schemas import CreateUser,  UserPublic
 from .usecases import (
     create_user
 )
 from .service import (
-    create
+    create,
+    delete_by_id
 )
 
 
@@ -66,6 +69,36 @@ async def users_create(
     )
 
     return new_user
+
+
+@router.delete("", status_code=200, response_model=UserPublic)
+async def users_delete(
+    request: Request,
+    response: Response,
+    user: UserPublic = Depends(get_current_user)
+):
+    await delete_by_id(
+        db=request.state.db,
+        user_id=user.user_id
+    )
+
+    cache_store = request.app.state.cache_store
+    session_id = UUID(request.cookies.get("session_id"))
+
+    await delete_session(
+        cache_store=cache_store,
+        session_id=session_id,
+        user_id=user.user_id
+    )
+
+    response.delete_cookie(
+        key="session_id",
+        path="/"
+    )
+
+    return user
+
+
 
 
 

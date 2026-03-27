@@ -6,9 +6,10 @@ from mutuo.users.service import get_by_email_hash
 from mutuo.security.hashing import deterministic_hash, compare_hash
 from mutuo.security.encryption import decrypt
 from mutuo.cache.protocols import CacheStore
+from mutuo.communications.service import send_email
 
-from .schemas import LoginCredentials, SessionContext
-from .usecases import login, create_session
+from .schemas import LoginCredentials, SessionContext, VerifyEmailRequest
+from .usecases import login, create_session, verify_email
 
 router = APIRouter(
     tags=["Auth"]
@@ -74,3 +75,20 @@ async def auth_logout(
     )
 
     return {"detail": [{"msg": "Logout successfull"}]}
+
+
+@router.post("/verify-email", status_code=200)
+async def auth_verify_email(
+    request: Request,
+    data: VerifyEmailRequest
+):
+    await verify_email(
+        db=request.state.db,
+        cache_store=request.app.cache_store,
+        email=data.email,
+        deterministic_hash=deterministic_hash,
+        get_user_by_email_hash=get_by_email_hash,
+        send_email=send_email
+    )
+
+    return {"detail": [{"msg": "verification email sent"}]}

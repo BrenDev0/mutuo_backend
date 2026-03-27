@@ -3,8 +3,7 @@ from typing import Callable, Awaitable
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mutuo.settings import settings
-from mutuo.security.hashing import DeterministicHashFn, HashFn
-from mutuo.security.encryption import EncryptFn, DecryptFn
+from mutuo.security.types import EncryptFn, DecryptFn, DeterministicHashFn, HashFn
 from mutuo.exceptions import UnauthorizedException
 from mutuo.cache.protocols import CacheStore
 
