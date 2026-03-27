@@ -1,26 +1,69 @@
 import asyncio
-from email.message import EmailMessage
-from pathlib import Path
-from typing import Callable, Awaitable
 from uuid import UUID, uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mutuo.utils import utc_now
 from mutuo.settings import settings
-from mutuo.exceptions import UnauthorizedException, ConflictException
-from mutuo.security.types import DeterministicHashFn, CompareHashFn,  DecryptFn
+from mutuo.exceptions import UnauthorizedException, ConflictException, NotfoundException, UnprocessableException
+from mutuo.security.types import DeterministicHashFn, CompareHashFn,  DecryptFn, HashFn, EncryptFn
 from mutuo.cache.protocols import CacheStore
 
-from mutuo.users.models import User
 from mutuo.users.schemas import UserPublic
+from mutuo.users.models import User
+from mutuo.users.types import GetByEmailHashFn, UpdateUserFn, CreateUserFn
 from mutuo.users.transformers import to_user_public
-from mutuo.communications.types import SendEmailFn
+from mutuo.communications.types import SendEmailFn, CreateVerificationEmailFn
 
-from .schemas import LoginCredentials, SessionContext, SessionSchema
-from .utils import generate_random_code
+from .schemas import LoginCredentials, SessionContext, SessionSchema, UpdateCredentials, RegisterUserRequest
+from .service import create_and_cache_verification_code, verify_code_or_raise
 
 
-GetByEmailHashFn = Callable[[AsyncSession, str], Awaitable[User | None]]
+async def _is_blocked(
+    hashed_email: str,
+    cache_store: CacheStore
+):
+    blocked_key = f"verification:blocked:{hashed_email}"
+    user_is_blocked = await cache_store.get(blocked_key)
+    if user_is_blocked:
+        raise UnauthorizedException("Max verification attempts reached")
+
+
+async def register_user_with_verification(
+    db: AsyncSession,
+    user_in: RegisterUserRequest,
+    encryption: EncryptFn,
+    decryption: DecryptFn,
+    hash: HashFn,
+    deterministic_hash: DeterministicHashFn,
+    cache_store: CacheStore,
+    create_fn: CreateUserFn
+) -> UserPublic:
+    
+    await verify_code_or_raise(
+        cache_store=cache_store,
+        hashed_email=deterministic_hash(user_in.email),
+        code_from_user=int(user_in.verification_code)
+    )
+
+    prepared_data = User(
+        name=encryption(user_in.name),
+        email= encryption(user_in.email),
+        email_hash=deterministic_hash(user_in.email),
+        password=hash(user_in.password),
+        profile_type=user_in.profile_type
+    )
+
+    new_user = await create_fn(
+        db,
+        prepared_data
+    )
+
+
+    return to_user_public(
+        user=new_user,
+        decryption=decryption
+    )
+
 
 async def create_session(
     session_context: SessionContext,
@@ -36,17 +79,17 @@ async def create_session(
         created_at=utc_now()
     )
 
-    user_cahe = user.model_dump(mode="json")
+    user_cache = user.model_dump(mode="json")
 
     await asyncio.gather(
         cache_store.set(
-            key=f"{str(session_id)}",
+            key=f"session:{session_id}",
             value=session_cache.model_dump(mode="json"),
             expire_seconds=settings.SESSION_MAX_AGE
         ),
         cache_store.set(
             key=f"user:cache:{user.user_id}",
-            value=user_cahe,
+            value=user_cache,
             expire_seconds=settings.USER_CACHE_MAX_AGE
         )
     )
@@ -60,8 +103,8 @@ async def delete_session(
     user_id: UUID
 ) -> UUID:
     await asyncio.gather(
-        cache_store.delete(str(session_id)),
-        cache_store.delete(f"cache:user{user_id}")
+        cache_store.delete(f"session:{session_id}"),
+        cache_store.delete(f"user:cache:{user_id}")
     )
 
     return session_id
@@ -91,58 +134,105 @@ async def login(
     )
 
     if not password_ok:
-        raise UnauthorizedException(detail="Incorrect email or password")
+        raise UnauthorizedException("Incorrect email or password")
     
     return to_user_public(user=user_exists, decryption=decryption)
 
 
-async def verify_email(
+async def verify_email_onboarding(
     db: AsyncSession,
     cache_store: CacheStore,
     email: str,
     deterministic_hash: DeterministicHashFn,
     get_user_by_email_hash: GetByEmailHashFn,
-    send_email: SendEmailFn
+    create_verification_email: CreateVerificationEmailFn, 
+    send_email: SendEmailFn,
 ):
     
     hashed_email = deterministic_hash(email)
     
-    blocked_key = f"verification:blocked:{hashed_email}"
-    user_is_blocked = await cache_store.get(blocked_key)
-    if user_is_blocked:
-        raise UnauthorizedException("Max verification attempts reached")
-
+    await _is_blocked(hashed_email=hashed_email, cache_store=cache_store)
 
     email_in_use = await get_user_by_email_hash(db, hashed_email)
 
     if email_in_use:
         raise ConflictException("Email in use")
     
-    code = generate_random_code()
+    code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
+    email_message = create_verification_email(code, email)
 
-    template_path = Path(__file__).parent.parent/"communications"/"templates"/"verify_email.html"
-
-    with open(template_path, 'r', encoding="utf-8") as f:
-        template = f.read()
-
-    email_body = template.replace('{{verification_code}}', str(code))
+    await asyncio.to_thread(send_email, email_message)
     
-    email_message = EmailMessage()
-    email_message["From"] = settings.MAILER_USER
-    email_message["To"] = email
-    email_message["Subject"] = "Verificar Correo Electrónico"
-    email_message.set_content(email_body, subtype="html")
 
-    verification_key = f"verification:code:{hashed_email}"
-    await cache_store.set(
-        key=verification_key,
-        value=code,
-        expire_seconds=60*15
+async def verify_email_update_credentials(
+    db: AsyncSession,
+    cache_store: CacheStore,
+    email: str,
+    deterministic_hash: DeterministicHashFn,
+    get_user_by_email_hash: GetByEmailHashFn,
+    create_verification_email: CreateVerificationEmailFn,
+    send_email: SendEmailFn,
+):
+    
+    hashed_email = deterministic_hash(email)
+
+    await _is_blocked(hashed_email=hashed_email, cache_store=cache_store)
+
+    user = await get_user_by_email_hash(db, hashed_email)
+    if user is None:
+        raise NotfoundException(detail="User not found")
+    
+    code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
+    email_message = create_verification_email(code, email)
+    await asyncio.to_thread(send_email, email_message)
+    
+
+async def update_credentials_with_verification(
+    db: AsyncSession,
+    cache_store: CacheStore,
+    changes: UpdateCredentials,
+    email: str,
+    code: int,
+    deterministic_hash: DeterministicHashFn,
+    hash: HashFn,
+    encrypt: EncryptFn,
+    decrypt: DecryptFn,
+    get_user_by_email_hash: GetByEmailHashFn,
+    update_user: UpdateUserFn
+):
+    hashed_email = deterministic_hash(email)
+    
+    await verify_code_or_raise(
+        cache_store=cache_store,
+        hashed_email=hashed_email,
+        code_from_user=code
     )
 
-    send_email(
-        email_message
-    )
+    if not changes.password and not changes.email:
+        raise UnprocessableException("At least one field required for update")
+
+    if changes.password and changes.email:
+        raise UnprocessableException("Cannot update both email and password")
+
+    user: User | None = await get_user_by_email_hash(db, hashed_email)
+
+    if user is None:
+        raise NotfoundException("User not found")
+    
+    update_data = {}
+
+    if changes.password is not None:
+        update_data["password"] = hash(changes.password)
+
+    if changes.email is not None:
+        update_data["email"] = encrypt(changes.email)
+        update_data["email_hash"] = deterministic_hash(changes.email)
+    
+    updated_user = await update_user(db, user.user_id, update_data)
+
+    return to_user_public(user=updated_user, decryption=decrypt)
+    
+    
 
 
 

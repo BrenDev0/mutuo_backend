@@ -1,5 +1,5 @@
 import pytest
-from mutuo.users.routes import users_create
+from mutuo.auth.routes import auth_register
 from unittest.mock import patch
 from uuid import uuid4
 from mutuo.users.schemas import UserPublic
@@ -8,8 +8,8 @@ from mutuo.auth.schemas import SessionContext
 
 
 @pytest.mark.asyncio
-@patch("mutuo.users.routes.create_session")
-@patch("mutuo.users.routes.create_user")
+@patch("mutuo.auth.routes.create_session")
+@patch("mutuo.auth.routes.register_user_with_verification")
 async def test_success(
     mock_create_user,
     mock_create_session,
@@ -30,7 +30,7 @@ async def test_success(
     )
     mock_request.app.state.cache_store = mock_cache_store
 
-    result = await users_create(
+    result = await auth_register(
         request=mock_request,
         response=mock_response,
         data=mock_create_user_schema
