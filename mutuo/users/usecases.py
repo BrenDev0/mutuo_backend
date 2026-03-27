@@ -27,7 +27,7 @@ async def update_user(
     
     update_data = {}
     
-    if changes.password != None:
+    if changes.password is not None:
         if not changes.current_password:
             raise UnprocessableException("Cannot update password without current password")
         
@@ -37,13 +37,13 @@ async def update_user(
         update_data["password"] = hash(changes.password)
 
     
-    if changes.name != None:
-        changes["name"] = encrypt(changes.name)
+    if changes.name is not None:
+        update_data["name"] = encrypt(changes.name)
 
     if not update_data:
         raise UnprocessableException("At least one field required for update")
     
-    updated_user = await update_user(db, user.user_id, changes)
+    updated_user = await update_user(db, user.user_id, update_data)
 
     return to_user_public(updated_user, decrypt)
 

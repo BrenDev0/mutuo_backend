@@ -159,7 +159,7 @@ async def verify_email_onboarding(
         raise ConflictException("Email in use")
     
     code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
-    email_message = create_verification_email(code=code, recipient_email=email)
+    email_message = create_verification_email(code, email)
 
     await asyncio.to_thread(send_email, email_message)
     
@@ -183,7 +183,7 @@ async def verify_email_update_credentials(
         raise NotfoundException(detail="User not found")
     
     code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
-    email_message = create_verification_email(code=code, recipient_email=email)
+    email_message = create_verification_email(code, email)
     await asyncio.to_thread(send_email, email_message)
     
 
@@ -196,6 +196,7 @@ async def update_credentials_with_verification(
     deterministic_hash: DeterministicHashFn,
     hash: HashFn,
     encrypt: EncryptFn,
+    decrypt: DecryptFn,
     get_user_by_email_hash: GetByEmailHashFn,
     update_user: UpdateUserFn
 ):
@@ -229,7 +230,7 @@ async def update_credentials_with_verification(
     
     updated_user = await update_user(db, user.user_id, update_data)
 
-    return to_user_public(updated_user)
+    return to_user_public(user=updated_user, decryption=decrypt)
     
     
 

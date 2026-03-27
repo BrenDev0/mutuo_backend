@@ -1,6 +1,5 @@
 import pytest
 from mutuo.auth.schemas import LoginCredentials, SessionContext
-import pytest
 from mutuo.auth.schemas import RegisterUserRequest
 
 @pytest.fixture
