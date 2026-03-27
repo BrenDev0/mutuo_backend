@@ -84,7 +84,7 @@ async def auth_verify_email(
 ):
     await verify_email(
         db=request.state.db,
-        cache_store=request.app.cache_store,
+        cache_store=request.app.state.cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
         get_user_by_email_hash=get_by_email_hash,
