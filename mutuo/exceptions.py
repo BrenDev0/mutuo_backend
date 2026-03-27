@@ -4,6 +4,7 @@ class ErrorSlug(StrEnum):
     NOT_FOUND =  "not_found"
     UNAUTHORIZED = "unauthorized"
     FORBIDDEN = "forbidden"
+    CONFLICT = "conflict"
 
 
 class MutuoException(Exception):
@@ -26,3 +27,7 @@ class UnauthorizedException(MutuoException):
 class ForbiddenException(MutuoException):
     def __init__(self, detail: str = "Forbidden"):
         super().__init__(detail=detail, slug=ErrorSlug.FORBIDDEN)
+
+class ConflictException(MutuoException):
+    def __init__(self, detail: str = "Conflict"):
+        super().__init__(detail=detail, slug=ErrorSlug.CONFLICT)

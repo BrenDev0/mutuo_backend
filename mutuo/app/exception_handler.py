@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 ERROR_STATUS_MAP: Dict[ErrorSlug, int] = {
     ErrorSlug.NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorSlug.FORBIDDEN: status.HTTP_403_FORBIDDEN,
-    ErrorSlug.UNAUTHORIZED: status.HTTP_401_UNAUTHORIZED
+    ErrorSlug.UNAUTHORIZED: status.HTTP_401_UNAUTHORIZED,
+    ErrorSlug.CONFLICT: status.HTTP_409_CONFLICT
 }
 
 class ExceptionHandler(BaseHTTPMiddleware):
