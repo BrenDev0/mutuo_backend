@@ -1,15 +1,15 @@
 import bcrypt
 import hashlib
 
-def deterministic_hash(data: str) -> str:
-        bytes = data.lower().encode('utf-8')  
+def deterministic_hash(value: str) -> str:
+        bytes = value.lower().encode('utf-8')  
         hashed_data = hashlib.sha256(bytes).hexdigest()
         return hashed_data
 
 
-def hash(password: str) -> str:
+def hash(str_to_hash: str) -> str:
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed = bcrypt.hashpw(str_to_hash.encode('utf-8'), salt)
     return hashed.decode('utf-8')
 
 
