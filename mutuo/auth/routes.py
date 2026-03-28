@@ -79,7 +79,7 @@ async def auth_register(
         decryption=decrypt,
         hash=hash,
         deterministic_hash=deterministic_hash,
-        create_fn=create,
+        create_user=create,
         cache_store=cache_store
     )
 

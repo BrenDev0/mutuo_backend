@@ -21,8 +21,7 @@ router = APIRouter(
 )
 
 
-
-@router.patch("/", status_code=200, response_model=UserPublic)
+@router.patch("", status_code=200, response_model=UserPublic)
 async def users_update(
     request: Request,
     data: UpdateUserRequest,
@@ -37,7 +36,7 @@ async def users_update(
         encrypt=encrypt,
         decrypt=decrypt,
         get_by_id=get_by_id,
-        update_user=update_by_id
+        update_user_by_id=update_by_id
     )
 
 

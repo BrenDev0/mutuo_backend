@@ -36,7 +36,7 @@ async def register_user_with_verification(
     hash: HashFn,
     deterministic_hash: DeterministicHashFn,
     cache_store: CacheStore,
-    create_fn: CreateUserFn
+    create_user: CreateUserFn
 ) -> UserPublic:
     
     await verify_code_or_raise(
@@ -53,7 +53,7 @@ async def register_user_with_verification(
         profile_type=user_in.profile_type
     )
 
-    new_user = await create_fn(
+    new_user = await create_user(
         db,
         prepared_data
     )
