@@ -79,7 +79,7 @@ async def db_session_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-@app.get("/health", status_code=200)
+@app.get("/", status_code=200)
 def health_check():
     return {
         "status": "Mutuo ok"
