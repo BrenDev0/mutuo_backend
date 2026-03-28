@@ -25,4 +25,4 @@ dev = [
 ]
 
 [project.scripts]
-app = "src.app.main:app"
+app = "mutup.app.main:app"
