@@ -19,7 +19,7 @@ async def update_user(
     encrypt: EncryptFn,
     decrypt: DecryptFn,
     get_by_id: GetByIdFn,
-    update_user: UpdateUserFn
+    update_user_by_id: UpdateUserFn
 ):
     user: User | None = await get_by_id(db, user_id)
     if user is None:
@@ -43,7 +43,7 @@ async def update_user(
     if not update_data:
         raise UnprocessableException("At least one field required for update")
     
-    updated_user = await update_user(db, user.user_id, update_data)
+    updated_user = await update_user_by_id(db, user.user_id, update_data)
 
     return to_user_public(updated_user, decrypt)
 

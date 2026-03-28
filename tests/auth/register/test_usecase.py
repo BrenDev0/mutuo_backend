@@ -35,7 +35,7 @@ async def test_success(
         decryption=decryption,
         hash=hash,
         deterministic_hash=deterministic_hash,
-        create_fn=mock_create_fn,
+        create_user=mock_create_fn,
         cache_store=mock_cache_store
     )
 
@@ -71,7 +71,7 @@ async def test_incorrect_verification_code(
             decryption=decryption,
             hash=hash,
             deterministic_hash=deterministic_hash,
-            create_fn=mock_create_fn,
+            create_user=mock_create_fn,
             cache_store=mock_cache_store
         )
     
@@ -100,7 +100,7 @@ async def test_max_attemps_blocked(
             decryption=decryption,
             hash=hash,
             deterministic_hash=deterministic_hash,
-            create_fn=mock_create_fn,
+            create_user=mock_create_fn,
             cache_store=mock_cache_store
         )
     
@@ -131,7 +131,7 @@ async def test_expired_code(
             decryption=decryption,
             hash=hash,
             deterministic_hash=deterministic_hash,
-            create_fn=mock_create_fn,
+            create_user=mock_create_fn,
             cache_store=mock_cache_store
         )
     

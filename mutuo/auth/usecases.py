@@ -15,17 +15,7 @@ from mutuo.users.transformers import to_user_public
 from mutuo.communications.types import SendEmailFn, CreateVerificationEmailFn
 
 from .schemas import LoginCredentials, SessionContext, SessionSchema, UpdateCredentials, RegisterUserRequest
-from .service import create_and_cache_verification_code, verify_code_or_raise
-
-
-async def _is_blocked(
-    hashed_email: str,
-    cache_store: CacheStore
-):
-    blocked_key = f"verification:blocked:{hashed_email}"
-    user_is_blocked = await cache_store.get(blocked_key)
-    if user_is_blocked:
-        raise UnauthorizedException("Max verification attempts reached")
+from .service import create_and_cache_verification_code, verify_code_or_raise, ensure_not_blocked_from_verification
 
 
 async def register_user_with_verification(
@@ -36,7 +26,7 @@ async def register_user_with_verification(
     hash: HashFn,
     deterministic_hash: DeterministicHashFn,
     cache_store: CacheStore,
-    create_fn: CreateUserFn
+    create_user: CreateUserFn
 ) -> UserPublic:
     
     await verify_code_or_raise(
@@ -53,7 +43,7 @@ async def register_user_with_verification(
         profile_type=user_in.profile_type
     )
 
-    new_user = await create_fn(
+    new_user = await create_user(
         db,
         prepared_data
     )
@@ -151,7 +141,7 @@ async def verify_email_onboarding(
     
     hashed_email = deterministic_hash(email)
     
-    await _is_blocked(hashed_email=hashed_email, cache_store=cache_store)
+    await ensure_not_blocked_from_verification(hashed_email=hashed_email, cache_store=cache_store)
 
     email_in_use = await get_user_by_email_hash(db, hashed_email)
 
@@ -176,7 +166,7 @@ async def verify_email_update_credentials(
     
     hashed_email = deterministic_hash(email)
 
-    await _is_blocked(hashed_email=hashed_email, cache_store=cache_store)
+    await ensure_not_blocked_from_verification(hashed_email=hashed_email, cache_store=cache_store)
 
     user = await get_user_by_email_hash(db, hashed_email)
     if user is None:
