@@ -23,3 +23,6 @@ dev = [
     "python-dotenv>=1.2.2",
     "ruff>=0.15.6",
 ]
+
+[project.scripts]
+app = "mutup.app.main:app"
