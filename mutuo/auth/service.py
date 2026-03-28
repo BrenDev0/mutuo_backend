@@ -5,13 +5,23 @@ from mutuo.exceptions import UnauthorizedException
 from mutuo.settings import settings
 
 def generate_random_code(
-    len: int = 6
+    length: int = 6
 ) -> int:
-    min_value = 10 ** (len - 1)
-    max_value = (10 ** len) -1
+    min_value = 10 ** (length - 1)
+    max_value = (10 ** length) -1
 
     return secrets.randbelow(max_value - min_value) + min_value
 
+
+async def ensure_not_blocked_from_verification(
+    hashed_email: str,
+    cache_store: CacheStore
+):
+    blocked_key = f"verification:blocked:{hashed_email}"
+    user_is_blocked = await cache_store.get(blocked_key)
+    if user_is_blocked:
+        raise UnauthorizedException("Max verification attempts reached")
+    
 
 async def create_and_cache_verification_code(
     cache_store: CacheStore,
@@ -28,6 +38,7 @@ async def create_and_cache_verification_code(
 
     return code
 
+
 async def verify_code_or_raise(
     cache_store: CacheStore,
     hashed_email: str,
@@ -37,9 +48,10 @@ async def verify_code_or_raise(
     attempts_key = f"verification:attempts:{hashed_email}"
     blocked_key = f"verification:blocked:{hashed_email}"
 
-    user_is_blocked = await cache_store.get(blocked_key)
-    if user_is_blocked:
-        raise UnauthorizedException("Max verification attempts reached")
+    await ensure_not_blocked_from_verification(
+        hashed_email=hashed_email,
+        cache_store=cache_store
+    )
 
     verification_code = await cache_store.get(
         key=verification_key
