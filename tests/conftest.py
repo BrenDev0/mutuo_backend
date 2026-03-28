@@ -57,3 +57,12 @@ def mock_user():
         profile_type="PROPIETARIO",
         created_at=datetime.now()
     )
+
+@pytest.fixture
+def mock_update_user_fn():
+    return AsyncMock()
+
+
+@pytest.fixture
+def mock_get_user_by_email_hash_fn():
+    return AsyncMock()

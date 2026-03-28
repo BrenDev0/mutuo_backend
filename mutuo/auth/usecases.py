@@ -185,6 +185,7 @@ async def update_credentials_with_verification(
     code: int,
     deterministic_hash: DeterministicHashFn,
     hash: HashFn,
+    compare_hash: CompareHashFn,
     encrypt: EncryptFn,
     decrypt: DecryptFn,
     get_user_by_email_hash: GetByEmailHashFn,
@@ -212,6 +213,9 @@ async def update_credentials_with_verification(
     update_data = {}
 
     if changes.password is not None:
+        if compare_hash(changes.password, user.password):
+            raise UnprocessableException("New password cannot be same as current password")
+
         update_data["password"] = hash(changes.password)
 
     if changes.email is not None:
