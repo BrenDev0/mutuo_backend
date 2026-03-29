@@ -66,3 +66,13 @@ def mock_update_user_fn():
 @pytest.fixture
 def mock_get_user_by_email_hash_fn():
     return AsyncMock()
+
+
+
+@pytest.fixture(autouse=True)
+def reset_mocks(mock_cryptography):
+    yield  # This is the split point
+    mock_cryptography.hash.reset_mock()
+    mock_cryptography.deterministic_hash.reset_mock()
+    mock_cryptography.encrypt.reset_mock()
+    mock_cryptography.compare_hash.reset_mock()
