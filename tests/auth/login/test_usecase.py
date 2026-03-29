@@ -25,7 +25,7 @@ async def test_success(
         db=db,
         cryptography=mock_cryptography,
         credentials=mock_credentials,
-        get_by_email_hash_fn=mock_get_by_email_fn
+        get_user_by_email_hash=mock_get_by_email_fn
     )
 
 
@@ -45,7 +45,7 @@ async def test_incorrect_email(
             db=db,
             cryptography=mock_cryptography,
             credentials=mock_credentials,
-            get_by_email_hash_fn=mock_get_by_email_fn
+            get_user_by_email_hash=mock_get_by_email_fn
         )
 
     assert "Incorrect email or password" in str(exc)
@@ -66,7 +66,7 @@ async def test_incorrect_password(
             db=db,
             cryptography=mock_cryptography,
             credentials=mock_credentials,
-            get_by_email_hash_fn=mock_get_by_email_fn
+            get_user_by_email_hash=mock_get_by_email_fn
         )
 
     assert "Incorrect email or password" in str(exc)

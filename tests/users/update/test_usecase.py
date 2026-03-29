@@ -33,7 +33,7 @@ async def test_success(
         user_id=mock_user.user_id,
         changes=mock_update_request,
         cryptography=mock_cryptography,
-        get_by_id=mock_get_by_id,
+        get_user_by_id=mock_get_by_id,
         update_user_by_id=mock_update_user_by_id
     )
 
@@ -70,7 +70,7 @@ async def test_user_not_found(
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,
-            get_by_id=mock_get_by_id,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -100,7 +100,7 @@ async def test_no_current_password(
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,
-            get_by_id=mock_get_by_id,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -130,7 +130,7 @@ async def test_incorrect_password(
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,
-            get_by_id=mock_get_by_id,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -155,7 +155,7 @@ async def test_empty_request(
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,
-            get_by_id=mock_get_by_id,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 

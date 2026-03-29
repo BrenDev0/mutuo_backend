@@ -26,8 +26,7 @@ async def test_success(
     result = await auth_verify_email(
         request=mock_request,
         data=mock_verify_email_request,
-        cache_store=mock_cache_store,
-        cryptography=mock_cryptography
+        cache_store=mock_cache_store
     )
 
     assert isinstance(result, dict)
