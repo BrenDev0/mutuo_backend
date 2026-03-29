@@ -16,17 +16,12 @@ def mock_get_by_id():
 
 @pytest.mark.asyncio
 async def test_success(
-    security_mocks,
+    mock_cryptography,
     mock_user,
     db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
-    
-    hash = security_mocks.hash_fn
-    comapre_hash = security_mocks.compare_hash
-    encrypt = security_mocks.encryption
-    decrypt = security_mocks.decryption
     mock_get_by_id.return_value = mock_user
     mock_update_user_by_id.return_value = mock_user
     mock_update_request = UpdateUserRequest(
@@ -37,11 +32,8 @@ async def test_success(
         db=db,
         user_id=mock_user.user_id,
         changes=mock_update_request,
-        hash=hash,
-        compare_hash=comapre_hash,
-        encrypt=encrypt,
-        decrypt=decrypt,
-        get_by_id=mock_get_by_id,
+        cryptography=mock_cryptography,
+        get_user_by_id=mock_get_by_id,
         update_user_by_id=mock_update_user_by_id
     )
 
@@ -61,17 +53,12 @@ async def test_success(
 
 @pytest.mark.asyncio
 async def test_user_not_found(
-    security_mocks,
+    mock_cryptography,
     mock_user,
     db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
-    
-    hash = security_mocks.hash_fn
-    comapre_hash = security_mocks.compare_hash
-    encrypt = security_mocks.encryption
-    decrypt = security_mocks.decryption
     mock_get_by_id.return_value = None
     mock_update_request = UpdateUserRequest(
         name="name"
@@ -82,11 +69,8 @@ async def test_user_not_found(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
-            hash=hash,
-            compare_hash=comapre_hash,
-            encrypt=encrypt,
-            decrypt=decrypt,
-            get_by_id=mock_get_by_id,
+            cryptography=mock_cryptography,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -98,17 +82,12 @@ async def test_user_not_found(
 
 @pytest.mark.asyncio
 async def test_no_current_password(
-    security_mocks,
+    mock_cryptography,
     mock_user,
     db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
-    
-    hash = security_mocks.hash_fn
-    comapre_hash = security_mocks.compare_hash
-    encrypt = security_mocks.encryption
-    decrypt = security_mocks.decryption
     mock_get_by_id.return_value = mock_user
     mock_update_request = UpdateUserRequest(
         name="name",
@@ -120,11 +99,8 @@ async def test_no_current_password(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
-            hash=hash,
-            compare_hash=comapre_hash,
-            encrypt=encrypt,
-            decrypt=decrypt,
-            get_by_id=mock_get_by_id,
+            cryptography=mock_cryptography,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -134,18 +110,13 @@ async def test_no_current_password(
 
 @pytest.mark.asyncio
 async def test_incorrect_password(
-    security_mocks,
+    mock_cryptography,
     mock_user,
     db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
-    
-    hash = security_mocks.hash_fn
-    comapre_hash = security_mocks.compare_hash
-    comapre_hash.return_value = False
-    encrypt = security_mocks.encryption
-    decrypt = security_mocks.decryption
+    mock_cryptography.compare_hash.return_value = False
     mock_get_by_id.return_value = mock_user
     mock_update_request = UpdateUserRequest(
         name="name",
@@ -158,11 +129,8 @@ async def test_incorrect_password(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
-            hash=hash,
-            compare_hash=comapre_hash,
-            encrypt=encrypt,
-            decrypt=decrypt,
-            get_by_id=mock_get_by_id,
+            cryptography=mock_cryptography,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 
@@ -172,17 +140,12 @@ async def test_incorrect_password(
 
 @pytest.mark.asyncio
 async def test_empty_request(
-    security_mocks,
+    mock_cryptography,
     mock_user,
     db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
-    
-    hash = security_mocks.hash_fn
-    comapre_hash = security_mocks.compare_hash
-    encrypt = security_mocks.encryption
-    decrypt = security_mocks.decryption
     mock_get_by_id.return_value = mock_user
     mock_update_request = UpdateUserRequest()
 
@@ -191,11 +154,8 @@ async def test_empty_request(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
-            hash=hash,
-            compare_hash=comapre_hash,
-            encrypt=encrypt,
-            decrypt=decrypt,
-            get_by_id=mock_get_by_id,
+            cryptography=mock_cryptography,
+            get_user_by_id=mock_get_by_id,
             update_user_by_id=mock_update_user_by_id
         )
 

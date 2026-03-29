@@ -11,6 +11,6 @@ def encrypt(data: str | int) -> str:
     return f.encrypt(str(data).encode()).decode()
 
 
-def decrypt(token: str) -> str:
+def decrypt(encrypted: str) -> str:
     f = get_fernet()
-    return f.decrypt(token.encode()).decode()
+    return f.decrypt(encrypted.encode()).decode()

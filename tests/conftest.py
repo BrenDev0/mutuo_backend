@@ -15,16 +15,16 @@ def mock_cache_store():
     return AsyncMock()
 
 @dataclass
-class SecurityMocks:
-    encryption = Mock(side_effect=lambda x: f"enc({x})")
-    decryption = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
-    hash_fn = Mock(return_value="hashed")
+class Cryptography:
+    encrypt = Mock(side_effect=lambda x: f"enc({x})")
+    decrypt = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
+    hash = Mock(return_value="hashed")
     compare_hash = Mock(return_value=True)
     deterministic_hash = Mock(return_value="hashed_email")
 
 @pytest.fixture
-def security_mocks():
-    return  SecurityMocks()
+def mock_cryptography():
+    return  Cryptography()
 
 
 @pytest.fixture
@@ -57,3 +57,22 @@ def mock_user():
         profile_type="PROPIETARIO",
         created_at=datetime.now()
     )
+
+@pytest.fixture
+def mock_update_user_fn():
+    return AsyncMock()
+
+
+@pytest.fixture
+def mock_get_user_by_email_hash_fn():
+    return AsyncMock()
+
+
+
+@pytest.fixture(autouse=True)
+def reset_mocks(mock_cryptography):
+    yield  # This is the split point
+    mock_cryptography.hash.reset_mock()
+    mock_cryptography.deterministic_hash.reset_mock()
+    mock_cryptography.encrypt.reset_mock()
+    mock_cryptography.compare_hash.reset_mock()

@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mutuo.utils import utc_now
 from mutuo.settings import settings
 from mutuo.exceptions import UnauthorizedException, ConflictException, NotfoundException, UnprocessableException
-from mutuo.security.types import DeterministicHashFn, CompareHashFn,  DecryptFn, HashFn, EncryptFn
+from mutuo.security.protocols import CryptographyService
+from mutuo.security.types import DeterministicHashFn
 from mutuo.cache.protocols import CacheStore
 
 from mutuo.users.schemas import UserPublic
@@ -21,25 +22,22 @@ from .service import create_and_cache_verification_code, verify_code_or_raise, e
 async def register_user_with_verification(
     db: AsyncSession,
     user_in: RegisterUserRequest,
-    encryption: EncryptFn,
-    decryption: DecryptFn,
-    hash: HashFn,
-    deterministic_hash: DeterministicHashFn,
+    cryptography: CryptographyService,
     cache_store: CacheStore,
     create_user: CreateUserFn
 ) -> UserPublic:
     
     await verify_code_or_raise(
         cache_store=cache_store,
-        hashed_email=deterministic_hash(user_in.email),
+        hashed_email=cryptography.deterministic_hash(user_in.email),
         code_from_user=int(user_in.verification_code)
     )
 
     prepared_data = User(
-        name=encryption(user_in.name),
-        email= encryption(user_in.email),
-        email_hash=deterministic_hash(user_in.email),
-        password=hash(user_in.password),
+        name=cryptography.encrypt(user_in.name),
+        email=cryptography.encrypt(user_in.email),
+        email_hash=cryptography.deterministic_hash(user_in.email),
+        password=cryptography.hash(user_in.password),
         profile_type=user_in.profile_type
     )
 
@@ -51,7 +49,7 @@ async def register_user_with_verification(
 
     return to_user_public(
         user=new_user,
-        decryption=decryption
+        decryption=cryptography.decrypt
     )
 
 
@@ -102,15 +100,13 @@ async def delete_session(
 
 async def login(
     db: AsyncSession,
-    deterministic_hash: DeterministicHashFn,
-    compare_hash: CompareHashFn,
-    decryption: DecryptFn,
+    cryptography: CryptographyService,
     credentials: LoginCredentials,
-    get_by_email_hash_fn: GetByEmailHashFn
+    get_user_by_email_hash: GetByEmailHashFn
 ) -> UserPublic:
-    hashed_email = deterministic_hash(credentials.email)
+    hashed_email = cryptography.deterministic_hash(credentials.email)
 
-    user_exists = await get_by_email_hash_fn(
+    user_exists = await get_user_by_email_hash(
         db,
         hashed_email
     )
@@ -118,7 +114,7 @@ async def login(
     if not user_exists:
         raise UnauthorizedException("Incorrect email or password")
     
-    password_ok = compare_hash(
+    password_ok = cryptography.compare_hash(
         credentials.password,
         user_exists.password
     )
@@ -126,7 +122,7 @@ async def login(
     if not password_ok:
         raise UnauthorizedException("Incorrect email or password")
     
-    return to_user_public(user=user_exists, decryption=decryption)
+    return to_user_public(user=user_exists, decryption=cryptography.decrypt)
 
 
 async def verify_email_onboarding(
@@ -183,14 +179,11 @@ async def update_credentials_with_verification(
     changes: UpdateCredentials,
     email: str,
     code: int,
-    deterministic_hash: DeterministicHashFn,
-    hash: HashFn,
-    encrypt: EncryptFn,
-    decrypt: DecryptFn,
+    cryptography: CryptographyService,
     get_user_by_email_hash: GetByEmailHashFn,
     update_user: UpdateUserFn
 ):
-    hashed_email = deterministic_hash(email)
+    hashed_email = cryptography.deterministic_hash(email)
     
     await verify_code_or_raise(
         cache_store=cache_store,
@@ -212,15 +205,18 @@ async def update_credentials_with_verification(
     update_data = {}
 
     if changes.password is not None:
-        update_data["password"] = hash(changes.password)
+        if cryptography.compare_hash(changes.password, user.password):
+            raise UnprocessableException("New password cannot be same as current password")
+
+        update_data["password"] = cryptography.hash(changes.password)
 
     if changes.email is not None:
-        update_data["email"] = encrypt(changes.email)
-        update_data["email_hash"] = deterministic_hash(changes.email)
+        update_data["email"] = cryptography.encrypt(changes.email)
+        update_data["email_hash"] = cryptography.deterministic_hash(changes.email)
     
     updated_user = await update_user(db, user.user_id, update_data)
 
-    return to_user_public(user=updated_user, decryption=decrypt)
+    return to_user_public(user=updated_user, decryption=cryptography.decrypt)
     
     
 

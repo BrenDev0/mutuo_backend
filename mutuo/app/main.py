@@ -6,6 +6,9 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from mutuo.cache.redis import RedisCacheStore
 from mutuo.settings import settings
 from mutuo.database.core import engine
+from mutuo.security.services import DefaultCryptographyService
+from mutuo.security.hashing import hash, compare_hash, deterministic_hash
+from mutuo.security.encryption import encrypt, decrypt
 
 from .rate_limiter import RateLimiter
 from .exception_handler import ExceptionHandler
@@ -19,10 +22,18 @@ configure_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cache_store = RedisCacheStore(settings.REDIS_URL)
+    cryptography_service = DefaultCryptographyService(
+        hash=hash,
+        deterministic_hash=deterministic_hash,
+        compare_hash=compare_hash,
+        encrypt=encrypt,
+        decrypt=decrypt
+    )
     db_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
     
     app.state.cache_store = cache_store
     app.state.db_session_maker = db_session_maker
+    app.state.cryptography = cryptography_service
     
     try:
         yield

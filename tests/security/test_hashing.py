@@ -14,8 +14,8 @@ def test_deterministic_hash():
     data1 = "hello"
     data2 = "hello"
 
-    result1 = deterministic_hash(data=data1)
-    result2 = deterministic_hash(data=data2)
+    result1 = deterministic_hash(data1)
+    result2 = deterministic_hash(data2)
 
     assert result1 == result2
 

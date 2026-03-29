@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Depends
 
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
 from mutuo.users.service import get_by_email_hash, create
-from mutuo.security.hashing import deterministic_hash, compare_hash, hash
-from mutuo.security.encryption import decrypt, encrypt
+from mutuo.security.dependencies import get_cryptography_service
+from mutuo.security.protocols import CryptographyService
+from mutuo.security.hashing import deterministic_hash
 from mutuo.cache.protocols import CacheStore
+from mutuo.cache.dependencies import get_cache_store
 from mutuo.communications.service import send_email, create_verification_email
 
 from .schemas import LoginCredentials, SessionContext, VerifyEmailRequest, RegisterUserRequest
@@ -49,11 +51,12 @@ async def _create_session_and_set_cookie(
 @router.post("/onboarding/verify-email", status_code=200)
 async def auth_verify_email(
     request: Request,
-    data: VerifyEmailRequest
+    data: VerifyEmailRequest,
+    cache_store: CacheStore = Depends(get_cache_store)
 ):
     await verify_email_onboarding(
         db=request.state.db,
-        cache_store=request.app.state.cache_store,
+        cache_store=cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
         get_user_by_email_hash=get_by_email_hash,
@@ -68,18 +71,15 @@ async def auth_verify_email(
 async def auth_register(
     request: Request,
     response: Response,
-    data: RegisterUserRequest
+    data: RegisterUserRequest,
+    cryptography: CryptographyService = Depends(get_cryptography_service),
+    cache_store: CacheStore = Depends(get_cache_store)
 ):
-    cache_store = request.app.state.cache_store
-
     new_user = await register_user_with_verification(
         db=request.state.db,
         user_in=data,
-        encryption=encrypt,
-        decryption=decrypt,
-        hash=hash,
-        deterministic_hash=deterministic_hash,
         create_user=create,
+        cryptography=cryptography, 
         cache_store=cache_store
     )
 
@@ -97,15 +97,14 @@ async def auth_register(
 async def auth_login(
     request: Request,
     response: Response,
-    data: LoginCredentials
+    data: LoginCredentials,
+    cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     user = await login(
         db=request.state.db,
-        deterministic_hash=deterministic_hash,
-        compare_hash=compare_hash,
-        decryption=decrypt,
+        cryptography=cryptography,
         credentials=data,
-        get_by_email_hash_fn=get_by_email_hash
+        get_user_by_email_hash=get_by_email_hash
     )
 
     await _create_session_and_set_cookie(
@@ -120,11 +119,11 @@ async def auth_login(
 @router.post("/logout", status_code=200)
 async def auth_logout(
     request: Request,
-    response: Response
+    response: Response,
+    cache_store: CacheStore = Depends(get_cache_store)
 ):
     session_id = request.cookies.get("session_id")
 
-    cache_store: CacheStore = request.app.state.cache_store
     if session_id:
         await cache_store.delete(f"session:{session_id}")
 
