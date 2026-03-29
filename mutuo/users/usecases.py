@@ -15,10 +15,10 @@ async def update_user(
     user_id: UUID,
     changes: UpdateUserRequest,
     cryptography: CryptographyService,
-    get_by_id: GetByIdFn,
+    get_user_by_id: GetByIdFn,
     update_user_by_id: UpdateUserFn
 ):
-    user: User | None = await get_by_id(db, user_id)
+    user: User | None = await get_user_by_id(db, user_id)
     if user is None:
         raise NotfoundException("User not found")
     
@@ -31,7 +31,7 @@ async def update_user(
         if not cryptography.compare_hash(changes.current_password, user.password):
             raise UnauthorizedException("Incorrect password")
         
-        update_data["password"] = hash(changes.password)
+        update_data["password"] = cryptography.hash(changes.password)
 
     
     if changes.name is not None:

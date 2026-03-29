@@ -52,8 +52,7 @@ async def _create_session_and_set_cookie(
 async def auth_verify_email(
     request: Request,
     data: VerifyEmailRequest,
-    cache_store: CacheStore = Depends(get_cache_store),
-    cryptography: CryptographyService = Depends(get_cryptography_service)
+    cache_store: CacheStore = Depends(get_cache_store)
 ):
     await verify_email_onboarding(
         db=request.state.db,

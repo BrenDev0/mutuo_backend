@@ -23,7 +23,7 @@ class DefaultCryptographyService(CryptographyService):
     def deterministic_hash(self, value):
         return self._deterministic_hash(value)
     
-    def compare_to_hash(self, unhashed: str, hashed: str):
+    def compare_hash(self, unhashed: str, hashed: str):
         return self._compare_hash(unhashed, hashed)
     
     def encrypt(self, data: str | int):

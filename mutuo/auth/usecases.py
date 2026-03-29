@@ -102,11 +102,11 @@ async def login(
     db: AsyncSession,
     cryptography: CryptographyService,
     credentials: LoginCredentials,
-    get_by_email_hash_fn: GetByEmailHashFn
+    get_user_by_email_hash: GetByEmailHashFn
 ) -> UserPublic:
     hashed_email = cryptography.deterministic_hash(credentials.email)
 
-    user_exists = await get_by_email_hash_fn(
+    user_exists = await get_user_by_email_hash(
         db,
         hashed_email
     )
@@ -208,7 +208,7 @@ async def update_credentials_with_verification(
         if cryptography.compare_hash(changes.password, user.password):
             raise UnprocessableException("New password cannot be same as current password")
 
-        update_data["password"] = hash(changes.password)
+        update_data["password"] = cryptography.hash(changes.password)
 
     if changes.email is not None:
         update_data["email"] = cryptography.encrypt(changes.email)
