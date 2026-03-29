@@ -18,7 +18,8 @@ async def test_success(
     mock_request,
     mock_response,
     mock_credentials,
-    db
+    db,
+    mock_cryptography
 ):
     mock_session_id = uuid4()
     mock_login.return_value = mock_user_public
@@ -32,7 +33,8 @@ async def test_success(
     result = await auth_login(
         request=mock_request,
         response=mock_response,
-        data=mock_credentials
+        data=mock_credentials,
+        cryptography=mock_cryptography
     )
 
 

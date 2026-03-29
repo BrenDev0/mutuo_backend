@@ -17,7 +17,8 @@ async def test_success(
     mock_response,
     mock_create_user_schema,
     mock_cache_store,
-    mock_user_public
+    mock_user_public,
+    mock_cryptography
 ):
     session_id = uuid4()
     mock_create_user.return_value = mock_user_public
@@ -33,7 +34,9 @@ async def test_success(
     result = await auth_register(
         request=mock_request,
         response=mock_response,
-        data=mock_create_user_schema
+        data=mock_create_user_schema,
+        cryptography=mock_cryptography,
+        cache_store=mock_cache_store
     )
 
     assert isinstance(result, UserPublic)

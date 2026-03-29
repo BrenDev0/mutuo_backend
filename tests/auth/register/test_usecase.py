@@ -13,17 +13,12 @@ def mock_create_fn():
 @pytest.mark.asyncio
 async def test_success(
     db,
-    security_mocks,
+    mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
     mock_user,
     mock_cache_store
 ):
-    
-    encryption = security_mocks.encryption
-    decryption = security_mocks.decryption
-    hash = security_mocks.hash_fn
-    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, 123]
 
     mock_create_fn.return_value = mock_user
@@ -31,34 +26,27 @@ async def test_success(
     result = await register_user_with_verification(
         db=db,
         user_in=mock_create_user_schema,
-        encryption=encryption,
-        decryption=decryption,
-        hash=hash,
-        deterministic_hash=deterministic_hash,
+        cryptography=mock_cryptography,
         create_user=mock_create_fn,
         cache_store=mock_cache_store
     )
 
     assert isinstance(result, UserPublic)
-    encryption.assert_has_calls(calls=[call("Carpincha Lucia"), call("carpincha@carpinchaCo.com")])
-    decryption.assert_has_calls(calls=[call("Carpincha Lucia"), call("carpincha@carpinchaCo.com")])
-    hash.assert_called_once_with("chonchdeagua")
+    mock_cryptography.encrypt.assert_has_calls(calls=[call("Carpincha Lucia"), call("carpincha@carpinchaCo.com")])
+    mock_cryptography.decrypt.assert_has_calls(calls=[call("Carpincha Lucia"), call("carpincha@carpinchaCo.com")])
+    mock_cryptography.hash.assert_called_once_with("chonchdeagua")
     assert mock_cache_store.get.call_count == 2
-    deterministic_hash.assert_has_calls(calls=[call("carpincha@carpinchaCo.com"), call("carpincha@carpinchaCo.com")])
+    mock_cryptography.deterministic_hash.assert_has_calls(calls=[call("carpincha@carpinchaCo.com"), call("carpincha@carpinchaCo.com")])
 
 
 @pytest.mark.asyncio
 async def test_incorrect_verification_code(
     mock_cache_store,
-    security_mocks,
+    mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
     db
 ):
-    encryption = security_mocks.encryption
-    decryption = security_mocks.decryption
-    hash = security_mocks.hash_fn
-    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, 1333]
     mock_cache_store.increment.return_value = 1
 
@@ -67,10 +55,7 @@ async def test_incorrect_verification_code(
         await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
-            encryption=encryption,
-            decryption=decryption,
-            hash=hash,
-            deterministic_hash=deterministic_hash,
+            cryptography=mock_cryptography,
             create_user=mock_create_fn,
             cache_store=mock_cache_store
         )
@@ -80,15 +65,11 @@ async def test_incorrect_verification_code(
 @pytest.mark.asyncio
 async def test_max_attemps_blocked(
     mock_cache_store,
-    security_mocks,
+    mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
     db
 ):
-    encryption = security_mocks.encryption
-    decryption = security_mocks.decryption
-    hash = security_mocks.hash_fn
-    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.return_value = 1
 
 
@@ -96,10 +77,7 @@ async def test_max_attemps_blocked(
         await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
-            encryption=encryption,
-            decryption=decryption,
-            hash=hash,
-            deterministic_hash=deterministic_hash,
+            cryptography=mock_cryptography,
             create_user=mock_create_fn,
             cache_store=mock_cache_store
         )
@@ -111,15 +89,11 @@ async def test_max_attemps_blocked(
 @pytest.mark.asyncio
 async def test_expired_code(
     mock_cache_store,
-    security_mocks,
+    mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
     db
 ):
-    encryption = security_mocks.encryption
-    decryption = security_mocks.decryption
-    hash = security_mocks.hash_fn
-    deterministic_hash = security_mocks.deterministic_hash
     mock_cache_store.get.side_effect = [None, None]
 
 
@@ -127,10 +101,7 @@ async def test_expired_code(
         await register_user_with_verification(
             db=db,
             user_in=mock_create_user_schema,
-            encryption=encryption,
-            decryption=decryption,
-            hash=hash,
-            deterministic_hash=deterministic_hash,
+            cryptography=mock_cryptography,
             create_user=mock_create_fn,
             cache_store=mock_cache_store
         )

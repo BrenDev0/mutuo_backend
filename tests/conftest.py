@@ -15,16 +15,16 @@ def mock_cache_store():
     return AsyncMock()
 
 @dataclass
-class SecurityMocks:
-    encryption = Mock(side_effect=lambda x: f"enc({x})")
-    decryption = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
-    hash_fn = Mock(return_value="hashed")
+class Cryptography:
+    encrypt = Mock(side_effect=lambda x: f"enc({x})")
+    decrypt = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
+    hash = Mock(return_value="hashed")
     compare_hash = Mock(return_value=True)
     deterministic_hash = Mock(return_value="hashed_email")
 
 @pytest.fixture
-def security_mocks():
-    return  SecurityMocks()
+def mock_cryptography():
+    return  Cryptography()
 
 
 @pytest.fixture

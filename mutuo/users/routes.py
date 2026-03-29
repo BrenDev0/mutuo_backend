@@ -3,8 +3,10 @@ from fastapi import APIRouter, Request, Response, Depends
 
 from mutuo.auth.usecases import  delete_session
 from mutuo.auth.dependencies import get_current_user
-from mutuo.security.hashing import hash, compare_hash
-from mutuo.security.encryption import encrypt, decrypt
+from mutuo.security.protocols import CryptographyService
+from mutuo.security.dependencies import get_cryptography_service
+from mutuo.cache.protocols import CacheStore
+from mutuo.cache.dependencies import get_cache_store
 
 from .schemas import  UserPublic, UpdateUserRequest
 from .usecases import update_user
@@ -25,17 +27,15 @@ router = APIRouter(
 async def users_update(
     request: Request,
     data: UpdateUserRequest,
-    user: UserPublic = Depends(get_current_user)
+    user: UserPublic = Depends(get_current_user),
+    cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     return await update_user(
         db=request.state.db,
         user_id=user.user_id,
         changes=data,
-        hash=hash,
-        compare_hash=compare_hash,
-        encrypt=encrypt,
-        decrypt=decrypt,
-        get_by_id=get_by_id,
+        cryptography=cryptography,
+        get_user_by_id=get_by_id,
         update_user_by_id=update_by_id
     )
 
@@ -44,14 +44,14 @@ async def users_update(
 async def users_delete(
     request: Request,
     response: Response,
-    user: UserPublic = Depends(get_current_user)
+    user: UserPublic = Depends(get_current_user),
+    cache_store: CacheStore = Depends(get_cache_store)
 ):
     await delete_by_id(
         db=request.state.db,
         user_id=user.user_id
     )
 
-    cache_store = request.app.state.cache_store
     session_id = UUID(request.cookies.get("session_id"))
 
     await delete_session(

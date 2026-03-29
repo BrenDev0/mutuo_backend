@@ -6,13 +6,11 @@ from mutuo.users.schemas import UserPublic
 
 
 @pytest.mark.asyncio
-@patch("mutuo.users.routes.Depends")
 @patch("mutuo.users.routes.delete_session")
 @patch("mutuo.users.routes.delete_by_id")
 async def test_success(
     mock_delete_by_id,
     mock_delete_session,
-    mock_depends,
     mock_request,
     mock_response,
     mock_user_public,
@@ -21,17 +19,16 @@ async def test_success(
 ):
     session_id = uuid4()
     mock_request.state.db = db
-    mock_request.app.state.cache_store = mock_cache_store
     cookies = {"session_id": str(session_id)}
     mock_request.cookies = cookies
     mock_delete_by_id.return_value = mock_user_public
     mock_delete_session.return_value = session_id
-    mock_depends.return_value = mock_user_public
 
     result = await users_delete(
         request=mock_request,
         response=mock_response,
-        user=mock_depends()
+        user=mock_user_public,
+        cache_store=mock_cache_store
     )
 
     assert isinstance(result, UserPublic)
