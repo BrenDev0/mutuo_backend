@@ -11,7 +11,13 @@ from mutuo.cache.dependencies import get_cache_store
 from mutuo.communications.service import send_email, create_verification_email
 
 from .schemas import LoginCredentials, SessionContext, VerifyEmailRequest, RegisterUserRequest
-from .usecases import login, create_session, verify_email_onboarding, register_user_with_verification
+from .usecases import (
+    login, 
+    create_session, 
+    request_onboarding_email_verification, 
+    request_update_credentials_email_verification, 
+    register_user_with_verification
+)
 
 router = APIRouter(
     tags=["Auth"]
@@ -48,13 +54,32 @@ async def _create_session_and_set_cookie(
     )
     
 
-@router.post("/onboarding/verify-email", status_code=200)
-async def auth_verify_email(
+@router.post("/email-verification/onboarding", status_code=200)
+async def auth_request_onboarding_email_verification(
     request: Request,
     data: VerifyEmailRequest,
     cache_store: CacheStore = Depends(get_cache_store)
 ):
-    await verify_email_onboarding(
+    await request_onboarding_email_verification(
+        db=request.state.db,
+        cache_store=cache_store,
+        email=data.email,
+        deterministic_hash=deterministic_hash,
+        get_user_by_email_hash=get_by_email_hash,
+        create_verification_email=create_verification_email,
+        send_email=send_email
+    )
+
+    return {"detail": [{"msg": "verification email sent"}]}
+
+
+@router.post("/email-verification/credentials", status_code=200)
+async def auth_request_update_credentials_email_verification(
+    request: Request,
+    data: VerifyEmailRequest,
+    cache_store: CacheStore = Depends(get_cache_store)
+):
+    await request_update_credentials_email_verification(
         db=request.state.db,
         cache_store=cache_store,
         email=data.email,

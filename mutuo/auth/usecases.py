@@ -19,6 +19,19 @@ from .schemas import LoginCredentials, SessionContext, SessionSchema, UpdateCred
 from .service import create_and_cache_verification_code, verify_code_or_raise, ensure_not_blocked_from_verification
 
 
+async def _create_and_send_verification_email(
+    cache_store: CacheStore,
+    create_verification_email: CreateVerificationEmailFn, 
+    send_email: SendEmailFn,
+    hashed_email: str, 
+    unhashed_email: str
+):
+    code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
+    email_message = create_verification_email(code, unhashed_email)
+
+    await asyncio.to_thread(send_email, email_message)
+
+
 async def register_user_with_verification(
     db: AsyncSession,
     user_in: RegisterUserRequest,
@@ -125,7 +138,7 @@ async def login(
     return to_user_public(user=user_exists, decryption=cryptography.decrypt)
 
 
-async def verify_email_onboarding(
+async def request_onboarding_email_verification(
     db: AsyncSession,
     cache_store: CacheStore,
     email: str,
@@ -144,13 +157,16 @@ async def verify_email_onboarding(
     if email_in_use:
         raise ConflictException("Email in use")
     
-    code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
-    email_message = create_verification_email(code, email)
-
-    await asyncio.to_thread(send_email, email_message)
+    await _create_and_send_verification_email(
+        cache_store=cache_store,
+        create_verification_email=create_verification_email,
+        send_email=send_email,
+        hashed_email=hashed_email,
+        unhashed_email=email
+    )
     
 
-async def verify_email_update_credentials(
+async def request_update_credentials_email_verification(
     db: AsyncSession,
     cache_store: CacheStore,
     email: str,
@@ -168,22 +184,26 @@ async def verify_email_update_credentials(
     if user is None:
         raise NotfoundException(detail="User not found")
     
-    code = await create_and_cache_verification_code(cache_store=cache_store, hashed_email=hashed_email)
-    email_message = create_verification_email(code, email)
-    await asyncio.to_thread(send_email, email_message)
+    await _create_and_send_verification_email(
+        cache_store=cache_store,
+        create_verification_email=create_verification_email,
+        send_email=send_email,
+        hashed_email=hashed_email,
+        unhashed_email=email
+    )
     
 
 async def update_credentials_with_verification(
     db: AsyncSession,
     cache_store: CacheStore,
     changes: UpdateCredentials,
-    email: str,
+    current_email: str,
     code: int,
     cryptography: CryptographyService,
     get_user_by_email_hash: GetByEmailHashFn,
     update_user: UpdateUserFn
 ):
-    hashed_email = cryptography.deterministic_hash(email)
+    hashed_email = cryptography.deterministic_hash(current_email)
     
     await verify_code_or_raise(
         cache_store=cache_store,

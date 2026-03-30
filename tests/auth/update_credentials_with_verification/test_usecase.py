@@ -31,7 +31,7 @@ async def test_update_password_success(
         cache_store=mock_cache_store,
         changes=mock_changes,
         cryptography=mock_cryptography,
-        email="email",
+        current_email="email",
         code=123,
         get_user_by_email_hash=mock_get_user_by_email_hash_fn,
         update_user=mock_update_user_fn
@@ -70,7 +70,7 @@ async def test_update_email_success(
         cache_store=mock_cache_store,
         changes=mock_changes,
         cryptography=mock_cryptography,
-        email="email",
+        current_email="email",
         code=123,
         get_user_by_email_hash=mock_get_user_by_email_hash_fn,
         update_user=mock_update_user_fn
@@ -107,7 +107,7 @@ async def test_empty_request(
             cache_store=mock_cache_store,
             changes=mock_changes,
             cryptography=mock_cryptography,
-            email="email",
+            current_email="email",
             code=123,
             get_user_by_email_hash=mock_get_user_by_email_hash_fn,
             update_user=mock_update_user_fn
@@ -146,7 +146,7 @@ async def test_email_and_password_in_request(
             cache_store=mock_cache_store,
             changes=mock_changes,
             cryptography=mock_cryptography,
-            email="email",
+            current_email="email",
             code=123,
             get_user_by_email_hash=mock_get_user_by_email_hash_fn,
             update_user=mock_update_user_fn
@@ -184,7 +184,7 @@ async def test_user_not_found(
             cache_store=mock_cache_store,
             changes=mock_changes,
             cryptography=mock_cryptography,
-            email="email",
+            current_email="email",
             code=123,
             get_user_by_email_hash=mock_get_user_by_email_hash_fn,
             update_user=mock_update_user_fn
@@ -224,7 +224,7 @@ async def test_current_password_match_new_password(
             cache_store=mock_cache_store,
             changes=mock_changes,
             cryptography=mock_cryptography,
-            email="email",
+            current_email="email",
             code=123,
             get_user_by_email_hash=mock_get_user_by_email_hash_fn,
             update_user=mock_update_user_fn

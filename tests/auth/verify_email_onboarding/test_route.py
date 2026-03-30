@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from mutuo.auth.routes import auth_verify_email
+from mutuo.auth.routes import auth_request_onboarding_email_verification
 from mutuo.auth.schemas import VerifyEmailRequest
 
 
@@ -11,10 +11,9 @@ def mock_verify_email_request():
     )
 
 @pytest.mark.asyncio
-@patch("mutuo.auth.routes.verify_email_onboarding")
+@patch("mutuo.auth.routes.request_onboarding_email_verification")
 async def test_success(
     mock_verify_email,
-    mock_cryptography,
     mock_request,
     mock_verify_email_request,
     mock_cache_store,
@@ -23,7 +22,7 @@ async def test_success(
     mock_verify_email.return_value = None
     mock_request.db = db
 
-    result = await auth_verify_email(
+    result = await auth_request_onboarding_email_verification(
         request=mock_request,
         data=mock_verify_email_request,
         cache_store=mock_cache_store
