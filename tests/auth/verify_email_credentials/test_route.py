@@ -8,7 +8,8 @@ from mutuo.auth.schemas import VerifyEmailRequest
 async def test_success(
     mock_usecase,
     mock_request,
-    mock_cache_store
+    mock_cache_store,
+    db
 ):
     mock_usecase.return_value = None
     mock_verify_email_request = VerifyEmailRequest(
@@ -16,7 +17,7 @@ async def test_success(
     )
 
     result = await auth_request_update_credentials_email_verification(
-        request=mock_request,
+        db=db,
         data=mock_verify_email_request,
         cache_store=mock_cache_store
     )

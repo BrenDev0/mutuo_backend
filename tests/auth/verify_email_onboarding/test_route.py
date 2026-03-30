@@ -20,10 +20,9 @@ async def test_success(
     db
 ):
     mock_verify_email.return_value = None
-    mock_request.db = db
 
     result = await auth_request_onboarding_email_verification(
-        request=mock_request,
+        db=db,
         data=mock_verify_email_request,
         cache_store=mock_cache_store
     )

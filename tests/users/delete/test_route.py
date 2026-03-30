@@ -18,7 +18,6 @@ async def test_success(
     db
 ):
     session_id = uuid4()
-    mock_request.state.db = db
     cookies = {"session_id": str(session_id)}
     mock_request.cookies = cookies
     mock_delete_by_id.return_value = mock_user_public
@@ -28,6 +27,7 @@ async def test_success(
         request=mock_request,
         response=mock_response,
         user=mock_user_public,
+        db=db,
         cache_store=mock_cache_store
     )
 

@@ -15,16 +15,14 @@ def mock_update_request():
 @patch("mutuo.users.routes.update_user")
 async def test_success(
     mock_update_user,
-    mock_request,
     mock_user_public,
     mock_update_request,
     db
 ):
-    mock_request.state.db = db
     mock_update_user.return_value = mock_user_public
 
     result = await users_update(
-        request=mock_request,
+        db=db,
         data=mock_update_request,
         user=mock_user_public
     )

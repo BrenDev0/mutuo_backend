@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Request, Response, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from mutuo.database.dependencies import get_db_session
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
 from mutuo.users.service import get_by_email_hash, create
@@ -56,12 +58,12 @@ async def _create_session_and_set_cookie(
 
 @router.post("/email-verification/onboarding", status_code=200)
 async def auth_request_onboarding_email_verification(
-    request: Request,
     data: VerifyEmailRequest,
+    db: AsyncSession = Depends(get_db_session),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     await request_onboarding_email_verification(
-        db=request.state.db,
+        db=db,
         cache_store=cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
@@ -75,12 +77,12 @@ async def auth_request_onboarding_email_verification(
 
 @router.post("/email-verification/credentials", status_code=200)
 async def auth_request_update_credentials_email_verification(
-    request: Request,
     data: VerifyEmailRequest,
+    db: AsyncSession = Depends(get_db_session),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     await request_update_credentials_email_verification(
-        db=request.state.db,
+        db=db,
         cache_store=cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
@@ -97,11 +99,12 @@ async def auth_register(
     request: Request,
     response: Response,
     data: RegisterUserRequest,
+    db: AsyncSession = Depends(get_db_session),
     cryptography: CryptographyService = Depends(get_cryptography_service),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     new_user = await register_user_with_verification(
-        db=request.state.db,
+        db=db,
         user_in=data,
         create_user=create,
         cryptography=cryptography, 
@@ -123,10 +126,11 @@ async def auth_login(
     request: Request,
     response: Response,
     data: LoginCredentials,
+    db: AsyncSession = Depends(get_db_session),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     user = await login(
-        db=request.state.db,
+        db=db,
         cryptography=cryptography,
         credentials=data,
         get_user_by_email_hash=get_by_email_hash

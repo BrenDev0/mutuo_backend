@@ -1,6 +1,8 @@
 from uuid import UUID
 from fastapi import APIRouter, Request, Response, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from mutuo.database.dependencies import get_db_session
 from mutuo.auth.usecases import  delete_session
 from mutuo.auth.dependencies import get_current_user
 from mutuo.security.protocols import CryptographyService
@@ -25,13 +27,13 @@ router = APIRouter(
 
 @router.patch("", status_code=200, response_model=UserPublic)
 async def users_update(
-    request: Request,
     data: UpdateUserRequest,
+    db: AsyncSession = Depends(get_db_session),
     user: UserPublic = Depends(get_current_user),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     return await update_user(
-        db=request.state.db,
+        db=db,
         user_id=user.user_id,
         changes=data,
         cryptography=cryptography,
@@ -44,11 +46,12 @@ async def users_update(
 async def users_delete(
     request: Request,
     response: Response,
+    db: AsyncSession = Depends(get_db_session),
     user: UserPublic = Depends(get_current_user),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     await delete_by_id(
-        db=request.state.db,
+        db=db,
         user_id=user.user_id
     )
 
