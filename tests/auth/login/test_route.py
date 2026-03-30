@@ -24,7 +24,6 @@ async def test_success(
     mock_session_id = uuid4()
     mock_login.return_value = mock_user_public
     mock_request.app.state.cache_store = mock_cache_store
-    mock_request.state.db = db
     mock_request.state.ip = "1.1.1.1"
     mock_request.headers = {"user-agent": "mock_agent"}
     mock_create_session.return_value = mock_session_id
@@ -34,6 +33,7 @@ async def test_success(
         request=mock_request,
         response=mock_response,
         data=mock_credentials,
+        db=db,
         cryptography=mock_cryptography
     )
 
