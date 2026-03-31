@@ -5,7 +5,11 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from mutuo.schemas import MutuoSchemaBase
+from enum import StrEnum
 
+class ProfileType(StrEnum):
+    OWNER = "PROPIETARIO"
+    RENTER = "INQUILINO"
 
 @dataclass(frozen=True)
 class SessionContext:
@@ -29,7 +33,7 @@ class SessionSchema(BaseModel):
 class RegisterUserRequest(MutuoSchemaBase):
     name: str
     email: str
-    profile_type: str
+    profile_type: ProfileType
     password: str
     verification_code: int
 

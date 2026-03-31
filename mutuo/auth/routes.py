@@ -62,6 +62,21 @@ async def auth_request_onboarding_email_verification(
     db: AsyncSession = Depends(get_db_session),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
+    """
+    Send verification code to users email. 
+
+    **For user registration only**
+    
+    ### Args: 
+    - **email**: email to send the verification link to
+
+    ### Returns: 
+    - success message
+    
+    ### Rasies: 
+    - **409 CONFLICT**: if email is in use
+    
+    """
     await request_onboarding_email_verification(
         db=db,
         cache_store=cache_store,
@@ -81,6 +96,10 @@ async def auth_request_update_credentials_email_verification(
     db: AsyncSession = Depends(get_db_session),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
+    """
+    
+
+    """
     await request_update_credentials_email_verification(
         db=db,
         cache_store=cache_store,
@@ -103,6 +122,27 @@ async def auth_register(
     cryptography: CryptographyService = Depends(get_cryptography_service),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
+    """
+    User registration
+    
+    **must call auth/email-verification/onboarding before calling this endpoint**
+
+    ### Args: 
+    - **name**: name of user
+    - **email**: email of user
+    - **profileType**: must be 'PROPIETARIO' or 'INQUILINO'
+    - **password**: user password
+    - **verificationCode**: code sent to users email
+    
+    ### Returns:
+    - **201**: user public schema
+
+    ### Raises
+    - **401 UNAUTHORIZED**: if incorrect code givin, max attempst (3) reached, or if code has expired or not been sent.
+    
+    **If max attempts are reached user will be blocked for 10 mins**
+
+    """
     new_user = await register_user_with_verification(
         db=db,
         user_in=data,
