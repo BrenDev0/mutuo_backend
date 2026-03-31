@@ -15,8 +15,6 @@ class UserPublic(MutuoSchemaBase):
 
 class UpdateUserRequest(MutuoSchemaBase):
     name: Optional[str] = None
-    password: Optional[str] = None
-    current_password: Optional[str] = None
 
 
 

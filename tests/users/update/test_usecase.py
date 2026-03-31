@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock
-from mutuo.exceptions import UnauthorizedException, NotfoundException, UnprocessableException
+from mutuo.exceptions import NotfoundException, UnprocessableException
 from mutuo.users.usecases import update_user
 from mutuo.users.schemas import UpdateUserRequest, UserPublic
 
@@ -77,65 +77,6 @@ async def test_user_not_found(
     assert "User not found" in str(exc_info)
     mock_update_user_by_id.assert_not_called()
 
-
-
-
-@pytest.mark.asyncio
-async def test_no_current_password(
-    mock_cryptography,
-    mock_user,
-    db,
-    mock_update_user_by_id,
-    mock_get_by_id
-):
-    mock_get_by_id.return_value = mock_user
-    mock_update_request = UpdateUserRequest(
-        name="name",
-        password="new"
-    )
-
-    with pytest.raises(UnprocessableException) as exc_info:
-        await update_user(
-            db=db,
-            user_id=mock_user.user_id,
-            changes=mock_update_request,
-            cryptography=mock_cryptography,
-            get_user_by_id=mock_get_by_id,
-            update_user_by_id=mock_update_user_by_id
-        )
-
-    assert "Cannot update password without current password" in str(exc_info)
-    mock_update_user_by_id.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_incorrect_password(
-    mock_cryptography,
-    mock_user,
-    db,
-    mock_update_user_by_id,
-    mock_get_by_id
-):
-    mock_cryptography.compare_hash.return_value = False
-    mock_get_by_id.return_value = mock_user
-    mock_update_request = UpdateUserRequest(
-        name="name",
-        password="new",
-        current_password="current"
-    )
-
-    with pytest.raises(UnauthorizedException) as exc_info:
-        await update_user(
-            db=db,
-            user_id=mock_user.user_id,
-            changes=mock_update_request,
-            cryptography=mock_cryptography,
-            get_user_by_id=mock_get_by_id,
-            update_user_by_id=mock_update_user_by_id
-        )
-
-    assert "Incorrect password" in str(exc_info)
-    mock_update_user_by_id.assert_not_called()
 
 
 @pytest.mark.asyncio

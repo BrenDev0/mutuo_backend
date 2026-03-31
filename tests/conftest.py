@@ -64,6 +64,11 @@ def mock_update_user_fn():
 
 
 @pytest.fixture
+def mock_get_user_by_id_fn():
+    return AsyncMock()
+
+
+@pytest.fixture
 def mock_get_user_by_email_hash_fn():
     return AsyncMock()
 

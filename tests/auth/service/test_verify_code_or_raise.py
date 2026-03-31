@@ -19,7 +19,7 @@ async def test_success(
         code_from_user=123456
     )
 
-    assert result == None
+    assert result is None
     mock_cache_store.get.assert_called_once_with(
         key="verification:code:hashed_email"
     )

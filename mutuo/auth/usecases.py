@@ -11,11 +11,19 @@ from mutuo.cache.protocols import CacheStore
 
 from mutuo.users.schemas import UserPublic
 from mutuo.users.models import User
-from mutuo.users.types import GetByEmailHashFn, UpdateUserFn, CreateUserFn
+from mutuo.users.types import GetByEmailHashFn, UpdateUserFn, CreateUserFn, GetByIdFn
 from mutuo.users.transformers import to_user_public
 from mutuo.communications.types import SendEmailFn, CreateVerificationEmailFn
 
-from .schemas import LoginCredentials, SessionContext, SessionSchema, UpdateCredentials, RegisterUserRequest
+from .schemas import (
+    LoginCredentials, 
+    SessionContext, 
+    SessionSchema, 
+    UpdateEmailRequest, 
+    UpdatePasswordRequest, 
+    UpdatePasswordWithVerificationCodeRequest, 
+    RegisterUserRequest
+)
 from .service import create_and_cache_verification_code, verify_code_or_raise, ensure_not_blocked_from_verification
 
 
@@ -193,53 +201,101 @@ async def request_update_credentials_email_verification(
     )
     
 
-async def update_credentials_with_verification(
+async def update_email(
+    db: AsyncSession,
+    user_id: UUID,
+    cryptography: CryptographyService,
+    cache_store: CacheStore,
+    get_user_by_id: GetByIdFn,
+    update_user: UpdateUserFn,
+    data_in: UpdateEmailRequest
+):
+    new_email_hash = cryptography.deterministic_hash(data_in.new_email)
+
+    await verify_code_or_raise(
+        cache_store=cache_store,
+        hashed_email=new_email_hash,
+        code_from_user=data_in.verification_code
+    )
+
+    user: User | None = await get_user_by_id(db, user_id)
+    if user is None:
+        raise NotfoundException("User not found")
+    
+    
+    new_email_encrypted = cryptography.encrypt(data_in.new_email)
+    
+    update_data = {
+        "email": new_email_encrypted,
+        "email_hash": new_email_hash 
+    }
+
+    updated_user = await update_user(db, user.user_id, update_data)
+
+    return to_user_public(updated_user, cryptography.decrypt)
+
+
+async def update_password_with_verification_code(
     db: AsyncSession,
     cache_store: CacheStore,
-    changes: UpdateCredentials,
-    current_email: str,
-    code: int,
     cryptography: CryptographyService,
+    data_in: UpdatePasswordWithVerificationCodeRequest,
     get_user_by_email_hash: GetByEmailHashFn,
     update_user: UpdateUserFn
 ):
-    hashed_email = cryptography.deterministic_hash(current_email)
-    
+    email_hash = cryptography.deterministic_hash(data_in.current_email)
+
     await verify_code_or_raise(
         cache_store=cache_store,
-        hashed_email=hashed_email,
-        code_from_user=code
+        hashed_email=email_hash,
+        code_from_user=data_in.verification_code
     )
 
-    if not changes.password and not changes.email:
-        raise UnprocessableException("At least one field required for update")
+    user: User | None = await get_user_by_email_hash(db, email_hash)
 
-    if changes.password and changes.email:
-        raise UnprocessableException("Cannot update both email and password")
+    if not user:
+        raise NotfoundException("User not found")
+    
+    if cryptography.compare_hash(data_in.new_password, user.password):
+        raise UnprocessableException("New password cannot be same as old password")
+    
+    new_password_hash = cryptography.hash(data_in.new_password)
+    update_data = {
+        "password": new_password_hash
+    }
 
-    user: User | None = await get_user_by_email_hash(db, hashed_email)
+    await update_user(db, user.user_id, update_data)
+
+
+async def update_password_with_current_password(
+    db: AsyncSession,
+    user_id: UUID,
+    cryptography: CryptographyService,
+    get_user_by_id: GetByIdFn,
+    update_user: UpdateUserFn,
+    data_in: UpdatePasswordRequest
+    
+):
+    user: User | None = await get_user_by_id(db, user_id)
 
     if user is None:
         raise NotfoundException("User not found")
     
-    update_data = {}
-
-    if changes.password is not None:
-        if cryptography.compare_hash(changes.password, user.password):
-            raise UnprocessableException("New password cannot be same as current password")
-
-        update_data["password"] = cryptography.hash(changes.password)
-
-    if changes.email is not None:
-        update_data["email"] = cryptography.encrypt(changes.email)
-        update_data["email_hash"] = cryptography.deterministic_hash(changes.email)
+    if not cryptography.compare_hash(data_in.current_password, user.password):
+        raise UnauthorizedException("Incorrect password")
     
+    if cryptography.compare_hash(data_in.new_password, user.password):
+        raise UnprocessableException("New password cannot be same as current password")
+    
+    new_password_hash = cryptography.hash(data_in.new_password)
+
+    update_data = {
+        "password": new_password_hash
+    }
+
     updated_user = await update_user(db, user.user_id, update_data)
 
-    return to_user_public(user=updated_user, decryption=cryptography.decrypt)
-    
-    
-
+    return to_user_public(updated_user, cryptography.decrypt)
 
 
     
