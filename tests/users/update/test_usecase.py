@@ -27,6 +27,7 @@ async def test_success(
     mock_update_request = UpdateUserRequest(
         name="name"
     )
+    mock_cryptography.encrypt.return_value = "encrypted"
 
     result = await update_user(
         db=db,
@@ -44,7 +45,7 @@ async def test_success(
     )
 
     update_data = {
-        "name": "enc(name)"
+        "name": "encrypted"
     }
 
     mock_update_user_by_id.assert_called_once_with(db, mock_user.user_id, update_data)

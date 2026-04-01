@@ -20,6 +20,8 @@ async def test_success(
     mock_verify_code_or_raise.return_value = None
     mock_get_user_by_id_fn.return_value = mock_user
     mock_update_user_fn.return_value = mock_user
+    mock_cryptography.deterministic_hash.return_value = "hashed_email"
+    mock_cryptography.encrypt.return_value = "encrypted"
     
     result = await update_email(
         db=db,
@@ -44,7 +46,7 @@ async def test_success(
         db,
         mock_user.user_id,
         {
-            "email": "enc(email)",
+            "email": "encrypted",
             "email_hash": "hashed_email"  
         }
     )
@@ -64,6 +66,8 @@ async def test_user_not_found(
 ):
     mock_verify_code_or_raise.return_value = None
     mock_get_user_by_id_fn.return_value = None
+    mock_cryptography.deterministic_hash.return_value = "hashed_email"
+
 
     with pytest.raises(NotfoundException) as exc_info:
 
