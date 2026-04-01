@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mutuo.exceptions import UnprocessableException, NotfoundException, UnauthorizedException
+from mutuo.exceptions import UnprocessableException, NotfoundException
 from mutuo.security.protocols import CryptographyService
 
 from .models import User
@@ -23,16 +23,6 @@ async def update_user(
         raise NotfoundException("User not found")
     
     update_data = {}
-    
-    if changes.password is not None:
-        if not changes.current_password:
-            raise UnprocessableException("Cannot update password without current password")
-        
-        if not cryptography.compare_hash(changes.current_password, user.password):
-            raise UnauthorizedException("Incorrect password")
-        
-        update_data["password"] = cryptography.hash(changes.password)
-
     
     if changes.name is not None:
         update_data["name"] = cryptography.encrypt(changes.name)

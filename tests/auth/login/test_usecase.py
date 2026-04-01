@@ -16,7 +16,7 @@ async def test_success(
     mock_user
 ):
     
-
+    mock_cryptography.decrypt.return_value = "decrypted"
     mock_cryptography.compare_hash.return_value = True
 
     mock_get_by_email_fn.return_value = mock_user 

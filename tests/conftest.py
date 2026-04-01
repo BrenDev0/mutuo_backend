@@ -16,11 +16,11 @@ def mock_cache_store():
 
 @dataclass
 class Cryptography:
-    encrypt = Mock(side_effect=lambda x: f"enc({x})")
-    decrypt = Mock(side_effect=lambda x: x.replace("enc(", "").replace(")", ""))
-    hash = Mock(return_value="hashed")
-    compare_hash = Mock(return_value=True)
-    deterministic_hash = Mock(return_value="hashed_email")
+    encrypt = Mock()
+    decrypt = Mock()
+    hash = Mock()
+    compare_hash = Mock()
+    deterministic_hash = Mock()
 
 @pytest.fixture
 def mock_cryptography():
@@ -64,6 +64,11 @@ def mock_update_user_fn():
 
 
 @pytest.fixture
+def mock_get_user_by_id_fn():
+    return AsyncMock()
+
+
+@pytest.fixture
 def mock_get_user_by_email_hash_fn():
     return AsyncMock()
 
@@ -76,3 +81,4 @@ def reset_mocks(mock_cryptography):
     mock_cryptography.deterministic_hash.reset_mock()
     mock_cryptography.encrypt.reset_mock()
     mock_cryptography.compare_hash.reset_mock()
+    mock_cryptography.compare_hash.side_effect = None

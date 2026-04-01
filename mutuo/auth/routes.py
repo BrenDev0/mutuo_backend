@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mutuo.database.dependencies import get_db_session
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
-from mutuo.users.service import get_by_email_hash, create
+from mutuo.users.service import get_by_email_hash, create, update_by_id, get_by_id
 from mutuo.security.dependencies import get_cryptography_service
 from mutuo.security.protocols import CryptographyService
 from mutuo.security.hashing import deterministic_hash
@@ -12,14 +12,26 @@ from mutuo.cache.protocols import CacheStore
 from mutuo.cache.dependencies import get_cache_store
 from mutuo.communications.service import send_email, create_verification_email
 
-from .schemas import LoginCredentials, SessionContext, VerifyEmailRequest, RegisterUserRequest
+from .schemas import (
+    LoginCredentials, 
+    SessionContext,
+    VerifyEmailRequest, 
+    RegisterUserRequest,
+    UpdateEmailRequest,
+    UpdatePasswordRequest,
+    UpdatePasswordWithVerificationCodeRequest
+)
 from .usecases import (
     login, 
     create_session, 
     request_onboarding_email_verification, 
     request_update_credentials_email_verification, 
-    register_user_with_verification
+    register_user_with_verification,
+    update_password_with_current_password,
+    update_password_with_verification_code,
+    update_email
 )
+from .dependencies import get_current_user
 
 router = APIRouter(
     tags=["Auth"]
@@ -204,3 +216,56 @@ async def auth_logout(
     return {"detail": [{"msg": "Logout successful"}]}
 
 
+@router.patch("/email", status_code=200, response_model=UserPublic)
+async def auth_update_email(
+    data: UpdateEmailRequest,
+    current_user: UserPublic = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    cryptography: CryptographyService = Depends(get_cryptography_service),
+    cache_store: CacheStore = Depends(get_cache_store),
+):
+    return await update_email(
+        db=db,
+        user_id=current_user.user_id,
+        cryptography=cryptography,
+        cache_store=cache_store,
+        get_user_by_id=get_by_id,
+        update_user=update_by_id,
+        data_in=data
+    )
+
+
+@router.patch("/password", status_code=200, response_model=UserPublic)
+async def auth_update_password(
+    data: UpdatePasswordRequest,
+    db: AsyncSession = Depends(get_db_session),
+    user: UserPublic = Depends(get_current_user),
+    cryptography: CryptographyService = Depends(get_cryptography_service)
+):
+    return await update_password_with_current_password(
+        db=db,
+        user_id=user.user_id,
+        cryptography=cryptography,
+        get_user_by_id=get_by_id,
+        update_user=update_by_id,
+        data_in=data
+    )
+
+
+@router.patch("/recovery/password", status_code=200)
+async def auth_update_password_with_verification_code(
+    data: UpdatePasswordWithVerificationCodeRequest,
+    db: AsyncSession = Depends(get_db_session),
+    cache_store: CacheStore = Depends(get_cache_store),
+    cryptography: CryptographyService = Depends(get_cryptography_service)
+):
+    await update_password_with_verification_code(
+        db=db,
+        cache_store=cache_store,
+        cryptography=cryptography,
+        data_in=data,
+        get_user_by_email_hash=get_by_email_hash,
+        update_user=update_by_id
+    )
+
+    return {"detail": [{"msg": "Password reset"}]}

@@ -3,19 +3,24 @@ from typing import Optional
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
+from enum import StrEnum
 
 from mutuo.schemas import MutuoSchemaBase
-from enum import StrEnum
+
 
 class ProfileType(StrEnum):
     OWNER = "PROPIETARIO"
     RENTER = "INQUILINO"
+
 
 @dataclass(frozen=True)
 class SessionContext:
     ip: Optional[str] = None
     client_agent: Optional[str] = None
 
+
+class VerificationCodeMixin(BaseModel):
+    verification_code: int
 
 
 class LoginCredentials(MutuoSchemaBase):
@@ -30,26 +35,30 @@ class SessionSchema(BaseModel):
     created_at: datetime
 
 
-class RegisterUserRequest(MutuoSchemaBase):
+class RegisterUserRequest(MutuoSchemaBase, VerificationCodeMixin):
     name: str
     email: str
     profile_type: ProfileType
     password: str
-    verification_code: int
 
 
 class VerifyEmailRequest(MutuoSchemaBase):
     email: str
 
 
-class UpdateCredentials(MutuoSchemaBase):
-    email: Optional[str] = None
-    password: Optional[str] = None
+class UpdateEmailRequest(MutuoSchemaBase, VerificationCodeMixin):
+    new_email: str
 
 
-class UpdateCredentialsRequest(MutuoSchemaBase):
-    email: str
-    code: int
-    changes: UpdateCredentials
+class UpdatePasswordRequest(MutuoSchemaBase):
+    new_password: str
+    current_password: str
+
+
+class UpdatePasswordWithVerificationCodeRequest(MutuoSchemaBase, VerificationCodeMixin):
+    current_email: str
+    new_password: str
+
+
 
 
