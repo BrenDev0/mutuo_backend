@@ -109,8 +109,19 @@ async def auth_request_update_credentials_email_verification(
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     """
-    
+    Send verification code to users email. 
 
+    **For user updating credentials; email, or password(account recovery) only**
+    
+    ### Args: 
+    - **email**: email to send the verification link to
+
+    ### Returns: 
+    - **200**: success message
+    
+    ### Rasies: 
+    - **404 NOT FOUND**: if user with email provided is not found
+    
     """
     await request_update_credentials_email_verification(
         db=db,
@@ -181,6 +192,19 @@ async def auth_login(
     db: AsyncSession = Depends(get_db_session),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
+    """
+    User login
+
+    ### Args: 
+    - **email**: email of user
+    - **password**: user password
+    
+    ### Returns:
+    - **200**: user public schema
+
+    ### Raises
+    - **401 UNAUTHORIZED**: if incorrect email or password provided
+    """
     user = await login(
         db=db,
         cryptography=cryptography,
@@ -203,6 +227,12 @@ async def auth_logout(
     response: Response,
     cache_store: CacheStore = Depends(get_cache_store)
 ):
+    """
+    User logout
+
+    ### Returns:
+    - **200**: success message 
+    """
     session_id = request.cookies.get("session_id")
 
     if session_id:
@@ -224,6 +254,21 @@ async def auth_update_email(
     cryptography: CryptographyService = Depends(get_cryptography_service),
     cache_store: CacheStore = Depends(get_cache_store),
 ):
+    """
+    Update users email
+
+    **Must call auth/email-verification/credentials before calling this endpoint**
+
+    ### Args: 
+        - **newEmail**: the email that verification was sent to in verification request
+        - **verificationCode**: Code from verification email
+    ### Returns:
+        - **200**: UserPublic schema
+
+    ### Raises:
+    - **401 UNAUTHORIZED**: if code exipred or invalid, or user has reached max attempts
+    - **404 NOT FOUND**: user is not found in db
+    """
     return await update_email(
         db=db,
         user_id=current_user.user_id,
