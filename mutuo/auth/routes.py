@@ -287,6 +287,20 @@ async def auth_update_password(
     user: UserPublic = Depends(get_current_user),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
+    """
+    Update password using current password
+
+    ### Args: 
+    - **newPassowrd**: New password
+    - **currentPassword**: users current password
+    
+    ### Returns:
+    - **200**: user public schema
+
+    ### Raises
+    - **401 UNAUTHORIZED**: if incorrect password provided
+    - **422 UNPROCESSABLE** if new password same as old password
+    """
     return await update_password_with_current_password(
         db=db,
         user_id=user.user_id,
@@ -304,6 +318,22 @@ async def auth_update_password_with_verification_code(
     cache_store: CacheStore = Depends(get_cache_store),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
+    """
+    Update password with verification code(to be used for account recovery)
+    **Must call auth/email-verification/credentials before calling this endpoint**
+
+    ### Args: 
+    - **currentEmail**: email of user
+    - **newPassword**: New password 
+    
+    ### Returns:
+    - **200**
+
+    ### Raises
+    - **404 NOT FOUND**: If user with email not found
+    - **422 UNPROCESSABLE**: If new password same as olde password
+    - **401 UNAUTHORIZED**: If verifcation fails
+    """
     await update_password_with_verification_code(
         db=db,
         cache_store=cache_store,
