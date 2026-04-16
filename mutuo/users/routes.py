@@ -32,6 +32,19 @@ async def users_update(
     user: UserPublic = Depends(get_current_user),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
+    """
+    Update user info
+
+    ### Args: 
+    - **name**: New name(optional)
+    
+    ### Returns:
+    - **200**: user public schema
+
+    ### Raises
+    - **422 UNPROCESSABLE**: If empty request
+    - **404 NOT FOUND**: If user not found
+    """
     return await update_user(
         db=db,
         user_id=user.user_id,
