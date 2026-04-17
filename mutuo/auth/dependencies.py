@@ -3,7 +3,7 @@ from uuid import UUID
 
 from mutuo.cache.protocols import CacheStore
 from mutuo.security.encryption import decrypt
-from mutuo.users.service import get_by_id
+from mutuo.users.repository import get_by_id
 from mutuo.users.transformers import to_user_public
 
 from .schemas import SessionSchema

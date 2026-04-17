@@ -1,6 +1,6 @@
 import pytest 
 from unittest.mock import patch
-from mutuo.users.routes import users_update
+from mutuo.users.routes import users_update_profile
 from mutuo.users.schemas import UpdateUserRequest, UserPublic
 
 @pytest.fixture
@@ -21,7 +21,7 @@ async def test_success(
 ):
     mock_update_user.return_value = mock_user_public
 
-    result = await users_update(
+    result = await users_update_profile(
         db=db,
         data=mock_update_request,
         user=mock_user_public
