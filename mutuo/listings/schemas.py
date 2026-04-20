@@ -1,6 +1,13 @@
 from uuid import UUID
-
+from datetime import datetime
 from mutuo.schemas import MutuoSchemaBase, Pagination
+from enum import StrEnum
+
+class ListingStatus(StrEnum):
+    AVAILABLE = "DISPONIBLE"
+    OCCUPIED = "OCUPADO"
+    UNAVAILABLE = "NO DISPONIBLE"
+
 
 
 class CreateListingRequest(MutuoSchemaBase):
@@ -10,12 +17,20 @@ class CreateListingRequest(MutuoSchemaBase):
     beds: int
     baths: float
     price: float
-    status: str
+    status: ListingStatus
 
 
 class ListingPublic(MutuoSchemaBase):
     listing_id: UUID
     user_id: UUID
+    name: str
+    description: str
+    address: str
+    beds: int
+    baths: float
+    price: float
+    status: str
+    created_at: datetime
 
 
 class ListingPage(Pagination):
