@@ -1,5 +1,4 @@
 from uuid import UUID
-from typing import Optional, Any, Union
 
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +31,7 @@ async def filter_and_page_listings(
     db: AsyncSession, 
     user_id: UUID, 
     pagination: Pagination,
-    filters: Optional[ListingFilters] = None
+    filters: ListingFilters | None = None
 ) -> list[Listing]:
     offset = (pagination.page_number - 1) * pagination.items_per_page
     stmt = select(Listing).where(Listing.user_id == user_id)
@@ -52,7 +51,7 @@ async def update_by_id(
     db: AsyncSession,
     listing_id: UUID,
     user_id: UUID,
-    changes: dict[str, Union[str, int, float]]
+    changes: dict[str, str | int | float]
 ) -> Listing | None:
     stmt = update(Listing).where(Listing.user_id == user_id).where(Listing.listing_id == listing_id).values(**changes).returning(Listing)
 
@@ -61,7 +60,7 @@ async def update_by_id(
     return result.scalar_one_or_none()
 
 
-async def delete_listing(
+async def delete_by_id(
     db: AsyncSession,
     listing_id: UUID,
     user_id: UUID

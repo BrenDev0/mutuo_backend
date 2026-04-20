@@ -1,6 +1,5 @@
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
 
 from mutuo.schemas import MutuoSchemaBase
 
@@ -14,7 +13,7 @@ class UserPublic(MutuoSchemaBase):
     
 
 class UpdateUserRequest(MutuoSchemaBase):
-    name: Optional[str] = None
+    name: str | None = None
 
 
 

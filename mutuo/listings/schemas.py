@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from mutuo.schemas import MutuoSchemaBase, Pagination
@@ -20,12 +19,12 @@ class ListingPublic(MutuoSchemaBase):
 
 
 class ListingPage(Pagination):
-    items: List[ListingPublic]
+    items: list[ListingPublic]
 
 
 class ListingFilters(MutuoSchemaBase):
-    name: Optional[str] = None
-    beds: Optional[str] = None
-    baths: Optional[str] = None
-    price: Optional[str] = None
-    status: Optional[str] = None
+    name: str | None = None
+    beds: str | None = None
+    baths: str | None = None
+    price: str | None = None
+    status: str | None = None

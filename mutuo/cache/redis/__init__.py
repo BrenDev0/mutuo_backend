@@ -1,6 +1,6 @@
 from redis import asyncio as aioredis
 import json
-from typing import Any, Dict
+from typing import Any
 from ..protocols import CacheStore
 
 
@@ -9,11 +9,11 @@ class RedisCacheStore(CacheStore):
         self._redis = aioredis.from_url(connection_url)
 
 
-    async def set(self, key: str, value: Dict[str,Any], expire_seconds: int) -> None:
+    async def set(self, key: str, value: dict[str,Any], expire_seconds: int) -> None:
         await self._redis.set(key, json.dumps(value), ex=expire_seconds)
 
 
-    async def get(self, key: str) -> Dict[str, Any] | None:
+    async def get(self, key: str) -> dict[str, Any] | None:
         data = await self._redis.get(key)
         if data is None:
             return None

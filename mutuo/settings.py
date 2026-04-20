@@ -1,10 +1,9 @@
 from pydantic_settings import BaseSettings
-from typing import List
 from cryptography.fernet import Fernet
 
 
 class Settings(BaseSettings):
-    ALLOW_ORIGINS: List[str] = ["http://localhost:8000"]
+    ALLOW_ORIGINS: list[str] = ["http://localhost:8000"]
 
     ENV: str = "local"
     DEBUG: bool = True
