@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import Optional
+from typing import Optional, Any, Union
 
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +14,18 @@ async def create(db: AsyncSession, listing_in: Listing) -> Listing:
     await db.refresh(listing_in)
 
     return listing_in
+
+
+async def get_listing_by_id(
+    db: AsyncSession,
+    lisitng_id: UUID,
+    user_id: UUID
+) -> Listing | None:
+    stmt = select(Listing).where(Listing.user_id == user_id).where(Listing.listing_id == lisitng_id)
+
+    result = await db.execute(stmt)
+
+    return result.scalar_one_or_none()
 
 
 async def filter_and_page_listings(
@@ -34,3 +46,28 @@ async def filter_and_page_listings(
     result = await db.execute(stmt)
 
     return list(result.scalars().all())
+
+
+async def update_by_id(
+    db: AsyncSession,
+    listing_id: UUID,
+    user_id: UUID,
+    changes: dict[str, Union[str, int, float]]
+) -> Listing | None:
+    stmt = update(Listing).where(Listing.user_id == user_id).where(Listing.listing_id == listing_id).values(**changes).returning(Listing)
+
+    result = await db.execute(stmt)
+
+    return result.scalar_one_or_none()
+
+
+async def delete_listing(
+    db: AsyncSession,
+    listing_id: UUID,
+    user_id: UUID
+)-> Listing | None:
+    stmt = delete(Listing).where(Listing.listing_id == listing_id).where(Listing.user_id == user_id).returning(Listing)
+
+    result = await db.execute(stmt)
+
+    return result.scalar_one_or_none()
