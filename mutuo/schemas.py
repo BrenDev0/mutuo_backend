@@ -11,3 +11,8 @@ class MutuoSchemaBase(BaseModel):
         str_strip_whitespace=True,
         extra="forbid"
     )
+
+
+class Pagination(BaseModel):
+    items_per_page: int
+    page_number: int
