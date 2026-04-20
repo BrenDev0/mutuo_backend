@@ -33,4 +33,4 @@ async def filter_and_page_listings(
 
     result = await db.execute(stmt)
 
-    return result.scalars().all()
+    return list(result.scalars().all())
