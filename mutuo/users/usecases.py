@@ -10,7 +10,7 @@ from .transformers import to_user_public
 from .types import  UpdateUserFn, GetByIdFn
 
 
-async def update_user(
+async def handle_update_user(
     db: AsyncSession,
     user_id: UUID,
     changes: UpdateUserRequest,

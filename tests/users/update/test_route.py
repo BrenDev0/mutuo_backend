@@ -12,7 +12,7 @@ def mock_update_request():
 
 
 @pytest.mark.asyncio
-@patch("mutuo.users.routes.update_user")
+@patch("mutuo.users.routes.handle_update_user")
 async def test_success(
     mock_update_user,
     mock_user_public,

@@ -11,7 +11,7 @@ from mutuo.cache.protocols import CacheStore
 from mutuo.cache.dependencies import get_cache_store
 
 from .schemas import  UserPublic, UpdateUserRequest
-from .usecases import update_user
+from .usecases import handle_update_user
 
 from .repository import (
     delete_by_id,
@@ -45,7 +45,7 @@ async def users_update_profile(
     - **422 UNPROCESSABLE**: If empty request
     - **404 NOT FOUND**: If user not found
     """
-    return await update_user(
+    return await handle_update_user(
         db=db,
         user_id=user.user_id,
         changes=data,

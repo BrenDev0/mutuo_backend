@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock
 from mutuo.exceptions import NotfoundException, UnprocessableException
-from mutuo.users.usecases import update_user
+from mutuo.users.usecases import handle_update_user
 from mutuo.users.schemas import UpdateUserRequest, UserPublic
 
 @pytest.fixture
@@ -29,7 +29,7 @@ async def test_success(
     )
     mock_cryptography.encrypt.return_value = "encrypted"
 
-    result = await update_user(
+    result = await handle_update_user(
         db=db,
         user_id=mock_user.user_id,
         changes=mock_update_request,
@@ -66,7 +66,7 @@ async def test_user_not_found(
     )
 
     with pytest.raises(NotfoundException) as exc_info:
-        await update_user(
+        await handle_update_user(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
@@ -92,7 +92,7 @@ async def test_empty_request(
     mock_update_request = UpdateUserRequest()
 
     with pytest.raises(UnprocessableException) as exc_info:
-        await update_user(
+        await handle_update_user(
             db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
