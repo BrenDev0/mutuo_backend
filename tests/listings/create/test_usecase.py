@@ -10,19 +10,6 @@ def mock_create():
     return AsyncMock()
 
 
-@pytest.fixture
-def mock_listing_in():
-    return CreateListingRequest(
-        name="mock",
-        description="mock description",
-        address="1234 mock",
-        beds=3,
-        baths=2.5,
-        price=8000,
-        status="DISPONIBLE"
-    )
-
-
 
 @pytest.mark.asyncio
 async def test_success(

@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from cryptography.fernet import Fernet
 
 
@@ -28,8 +28,9 @@ class Settings(BaseSettings):
     MAILER_USER: str
     MAILER_PASSWORD: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env"
+    )
 
 
 settings = Settings() # type: ignore[call-arg]
