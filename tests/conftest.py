@@ -3,6 +3,7 @@ from uuid import uuid4
 from dataclasses import dataclass
 from unittest.mock import AsyncMock, Mock
 from datetime import datetime
+
 from mutuo.users.schemas import UserPublic
 from mutuo.users.models import User
 
@@ -76,7 +77,7 @@ def mock_get_user_by_email_hash_fn():
 
 @pytest.fixture(autouse=True)
 def reset_mocks(mock_cryptography):
-    yield  # This is the split point
+    yield 
     mock_cryptography.hash.reset_mock()
     mock_cryptography.deterministic_hash.reset_mock()
     mock_cryptography.encrypt.reset_mock()
