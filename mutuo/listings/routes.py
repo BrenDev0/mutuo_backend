@@ -8,7 +8,7 @@ from mutuo.users.schemas import UserPublic
 
 from .schemas import CreateListingRequest, ListingPublic, ListingPage, ListingFilters
 from .usecases import handle_create_listing
-from .repository import create, filter_and_page_listings
+from .repository import create, get_by_user_id
 
 router = APIRouter(
     tags=["Listings"]
@@ -44,17 +44,12 @@ async def listings_create(
     )
 
 
-@router.get("", status_code=200, response_model=ListingPage)
-async def Listings_collection(
-    pagination: Pagination,
-    filters: ListingFilters | None = None,
-    db: AsyncSession = Depends(get_db_session),
-    user: UserPublic = Depends(user_is_owner)
-):
-    return filter_and_page_listings(
-        db=db,
-        user_id=user.user_id,
-        pagination=pagination,
-        filters=filters
-    )
+# @router.get("", status_code=200, response_model=ListingPage)
+# async def Listings_collection(
+#     pagination: Pagination,
+#     filters: ListingFilters | None = None,
+#     db: AsyncSession = Depends(get_db_session),
+#     user: UserPublic = Depends(user_is_owner)
+# ):
+#     pass
 

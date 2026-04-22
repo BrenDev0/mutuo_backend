@@ -27,20 +27,20 @@ async def get_by_id(
     return result.scalar_one_or_none()
 
 
-async def filter_and_page_listings(
+async def get_by_user_id(
     db: AsyncSession, 
     user_id: UUID, 
-    pagination: Pagination,
-    filters: ListingFilters | None = None
+    offset: int,
+    limit: int,
+    filters: dict[str, object] | None = None
 ) -> list[Listing]:
-    offset = (pagination.page_number - 1) * pagination.items_per_page
     stmt = select(Listing).where(Listing.user_id == user_id)
 
     if filters:
-        for k, v in filters.model_dump(exclude_none=True).items():
+        for k, v in filters.items():
             stmt = stmt.where(getattr(Listing, k) == v)
 
-    stmt = stmt.limit(pagination.items_per_page).offset(offset)
+    stmt = stmt.limit(limit).offset(offset)
 
     result = await db.execute(stmt)
 
