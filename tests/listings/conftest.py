@@ -9,6 +9,7 @@ from mutuo.listings.models import Listing
 @pytest.fixture
 def mock_listing_in():
     return CreateListingRequest(
+        property_type="CASA",
         name="mock",
         description="mock description",
         address="1234 mock",
@@ -24,6 +25,7 @@ def mock_listing():
     return Listing(
         listing_id=uuid4(),
         user_id=uuid4(),
+        property_type="CASA",
         name="mock",
         description="mock description",
         address="1234 mock st",

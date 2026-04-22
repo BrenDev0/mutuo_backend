@@ -6,7 +6,7 @@ from mutuo.security.protocols import CryptographyService
 
 from .models import User
 from .schemas import UpdateUserRequest
-from .transformers import to_user_public
+from .mappers import to_user_public
 from .types import  UpdateUserFn, GetByIdFn
 
 

@@ -4,7 +4,7 @@ from uuid import UUID
 from mutuo.cache.protocols import CacheStore
 from mutuo.security.encryption import decrypt
 from mutuo.users.repository import get_by_id
-from mutuo.users.transformers import to_user_public
+from mutuo.users.mappers import to_user_public
 from mutuo.users.schemas import UserPublic
 
 from .schemas import SessionSchema, ProfileType

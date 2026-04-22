@@ -12,7 +12,7 @@ from mutuo.cache.protocols import CacheStore
 from mutuo.users.schemas import UserPublic
 from mutuo.users.models import User
 from mutuo.users.types import GetByEmailHashFn, UpdateUserFn, CreateUserFn, GetByIdFn
-from mutuo.users.transformers import to_user_public
+from mutuo.users.mappers import to_user_public
 from mutuo.communications.types import SendEmailFn, CreateVerificationEmailFn
 
 from .schemas import (

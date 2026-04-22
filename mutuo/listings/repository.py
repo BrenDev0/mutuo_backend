@@ -15,7 +15,7 @@ async def create(db: AsyncSession, listing_in: Listing) -> Listing:
     return listing_in
 
 
-async def get_listing_by_id(
+async def get_by_id(
     db: AsyncSession,
     lisitng_id: UUID,
     user_id: UUID

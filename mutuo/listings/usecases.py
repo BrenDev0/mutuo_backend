@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .types import CreateListingFn
 from .schemas import CreateListingRequest, ListingPublic
-from .transformers import listing_in_to_model, to_listing_public
+from .mappers import listing_in_to_model, model_to_listing_public
 from .models import Listing
 
 async def handle_create_listing(
@@ -16,4 +16,4 @@ async def handle_create_listing(
 
     new_listing = await create_listing(db, listing_data)
 
-    return to_listing_public(model=new_listing)
+    return model_to_listing_public(model=new_listing)
