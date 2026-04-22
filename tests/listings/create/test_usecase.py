@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock
 
 from mutuo.listings.usecases import handle_create_listing
-from mutuo.listings.schemas import CreateListingRequest, ListingPublic
+from mutuo.listings.schemas import ListingPublic
 from mutuo.listings.models import Listing
 
 @pytest.fixture
