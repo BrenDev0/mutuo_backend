@@ -77,6 +77,7 @@ async def db_session_middleware(
         return response
 
     except Exception:
+        await request.state.db.rollback()
         await request.state.db.close()
         raise
     

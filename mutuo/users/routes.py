@@ -13,7 +13,7 @@ from mutuo.cache.dependencies import get_cache_store
 from .schemas import  UserPublic, UpdateUserRequest
 from .usecases import update_user
 
-from .service import (
+from .repository import (
     delete_by_id,
     update_by_id,
     get_by_id
@@ -26,14 +26,14 @@ router = APIRouter(
 
 
 @router.patch("", status_code=200, response_model=UserPublic)
-async def users_update(
+async def users_update_profile(
     data: UpdateUserRequest,
     db: AsyncSession = Depends(get_db_session),
     user: UserPublic = Depends(get_current_user),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     """
-    Update user info
+    Update user profile info
 
     ### Args: 
     - **name**: New name(optional)

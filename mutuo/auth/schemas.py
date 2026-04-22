@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
@@ -15,8 +14,8 @@ class ProfileType(StrEnum):
 
 @dataclass(frozen=True)
 class SessionContext:
-    ip: Optional[str] = None
-    client_agent: Optional[str] = None
+    ip: str | None = None
+    client_agent: str | None = None
 
 
 class VerificationCodeMixin(BaseModel):
@@ -30,8 +29,8 @@ class LoginCredentials(MutuoSchemaBase):
 
 class SessionSchema(BaseModel):
     user_id: UUID
-    ip: Optional[str] = None
-    client_agent: Optional[str] = None
+    ip: str | None = None
+    client_agent: str | None = None
     created_at: datetime
 
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mutuo.database.dependencies import get_db_session
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
-from mutuo.users.service import get_by_email_hash, create, update_by_id, get_by_id
+from mutuo.users.repository import get_by_email_hash, create, update_by_id, get_by_id
 from mutuo.security.dependencies import get_cryptography_service
 from mutuo.security.protocols import CryptographyService
 from mutuo.security.hashing import deterministic_hash

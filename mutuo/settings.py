@@ -1,10 +1,9 @@
-from pydantic_settings import BaseSettings
-from typing import List
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from cryptography.fernet import Fernet
 
 
 class Settings(BaseSettings):
-    ALLOW_ORIGINS: List[str] = ["http://localhost:8000"]
+    ALLOW_ORIGINS: list[str] = ["http://localhost:8000"]
 
     ENV: str = "local"
     DEBUG: bool = True
@@ -29,8 +28,9 @@ class Settings(BaseSettings):
     MAILER_USER: str
     MAILER_PASSWORD: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env"
+    )
 
 
 settings = Settings() # type: ignore[call-arg]
