@@ -1,12 +1,11 @@
 from uuid import UUID
+from typing import Any
 
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mutuo.schemas import Pagination
-
-from .schemas import ListingFilters
 from .models import Listing
+
 
 async def create(db: AsyncSession, listing_in: Listing) -> Listing:
     db.add(listing_in)
@@ -32,7 +31,7 @@ async def get_by_user_id(
     user_id: UUID, 
     offset: int,
     limit: int,
-    filters: dict[str, object] | None = None
+    filters: dict[str, Any] | None = None
 ) -> list[Listing]:
     stmt = select(Listing).where(Listing.user_id == user_id)
 
@@ -51,7 +50,7 @@ async def update_by_id(
     db: AsyncSession,
     listing_id: UUID,
     user_id: UUID,
-    changes: dict[str, str | int | float]
+    changes: dict[str, Any]
 ) -> Listing | None:
     stmt = update(Listing).where(Listing.user_id == user_id).where(Listing.listing_id == listing_id).values(**changes).returning(Listing)
 
