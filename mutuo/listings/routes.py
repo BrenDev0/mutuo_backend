@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from mutuo.database.dependencies import get_db_session
 from mutuo.auth.dependencies import user_is_owner
 from mutuo.schemas import Pagination
 from mutuo.users.schemas import UserPublic
 
 from .schemas import CreateListingRequest, ListingPublic, ListingPage, ListingFilters
 from .usecases import handle_create_listing
-from .repository import create, get_by_user_id
+from .sqlalchemy.dependencies import provide_create_listing
+from .types import CreateListingFn
 
 router = APIRouter(
     tags=["Listings"]
@@ -17,7 +15,7 @@ router = APIRouter(
 @router.post("", status_code=201, response_model=ListingPublic)
 async def listings_create(
     data: CreateListingRequest,
-    db: AsyncSession = Depends(get_db_session),
+    create_listing: CreateListingFn = Depends(provide_create_listing),
     user: UserPublic = Depends(user_is_owner)
 ):
     """
@@ -37,10 +35,9 @@ async def listings_create(
     - **201**: public schema 
     """
     return await handle_create_listing(
-        db=db,
         user_id=user.user_id,
         listing_in=data,
-        create_listing=create
+        create_listing=create_listing
     )
 
 

@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Listing
+from ..models import Listing
 
 
 async def create(db: AsyncSession, listing_in: Listing) -> Listing:

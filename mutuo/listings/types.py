@@ -1,8 +1,17 @@
-from typing import Callable, Awaitable
+from typing import Callable, Awaitable, Any
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
+from dataclasses import dataclass
 
 from .models import Listing
 
-CreateListingFn = Callable[[AsyncSession, Listing], Awaitable[Listing]]
-GetByUserIdFn = Callable[[AsyncSession, UUID, int, int, dict], Awaitable[list[Listing]]]
+CreateListingFn = Callable[[Listing], Awaitable[Listing]]
+
+@dataclass(frozen=True)
+class UserListingQuery:
+    user_id: UUID
+    offset: int
+    limit: int
+    filters: dict[str, Any] | None = None
+
+
+GetByUserIdFn = Callable[[UserListingQuery], Awaitable[list[Listing]]]

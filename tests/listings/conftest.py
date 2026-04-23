@@ -1,9 +1,16 @@
 import pytest
 from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock
 
 from mutuo.listings.schemas import ListingPublic, CreateListingRequest
 from mutuo.listings.models import Listing
+
+@pytest.fixture
+def mock_create():
+    return AsyncMock()
+
+
 
 
 @pytest.fixture

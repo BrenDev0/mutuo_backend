@@ -1,28 +1,25 @@
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from mutuo.schemas import Pagination
 
-from .types import CreateListingFn, GetByUserIdFn
+from .types import CreateListingFn, GetByUserIdFn, UserListingQuery
 from .schemas import CreateListingRequest, ListingPublic, ListingFilters, ListingPage
 from .mappers import listing_in_to_model, model_to_listing_public
 from .models import Listing
 
 async def handle_create_listing(
-    db: AsyncSession,
     user_id: UUID,
     listing_in: CreateListingRequest, 
     create_listing: CreateListingFn
 ) -> ListingPublic:
     listing_data: Listing = listing_in_to_model(schema=listing_in, user_id=user_id)
-
-    new_listing = await create_listing(db, listing_data)
+   
+    new_listing = await create_listing(listing_data)
 
     return model_to_listing_public(model=new_listing)
 
 
-async def get_page_of_user_owned_listings(
-    db: AsyncSession,
+async def get_user_owned_listings(
     user_id: UUID,
     pagination: Pagination,
     get_by_user_id: GetByUserIdFn,
@@ -34,13 +31,14 @@ async def get_page_of_user_owned_listings(
 
     cleaned_filters = filters.model_dump(exclude_none=True) if filters else None
 
-    listings = await get_by_user_id(
-        db,
-        user_id,
-        offset,
-        limit,
-        cleaned_filters
+    query = UserListingQuery(
+        user_id=user_id,
+        offset=offset,
+        limit=limit,
+        filters=cleaned_filters
     )
+    
+    listings = await get_by_user_id(query)
 
 
     return ListingPage(
