@@ -3,12 +3,12 @@ from fastapi import Depends
 from mutuo.database.dependencies import get_db_session
 
 from .repository import create, get_by_user_id
-from ..models import Listing
+from ..models import Listing, ListingPartial
 from ..types import GetByUserIdFn, CreateListingFn, UserListingQuery
 
 
 def provide_create_listing(db: AsyncSession = Depends(get_db_session)) -> CreateListingFn:
-    async def create_listing(listing_in: Listing) -> Listing:
+    async def create_listing(listing_in: ListingPartial) -> Listing:
         return  await create(db=db, listing_in=listing_in)
     
     return create_listing

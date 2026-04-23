@@ -1,14 +1,14 @@
 from uuid import UUID
 
-from .models import Listing
+from .models import Listing, ListingPartial
 from .schemas import ListingPublic, CreateListingRequest
 
-def model_to_listing_public(model: Listing) -> ListingPublic:
+def listing_to_public(model: Listing) -> ListingPublic:
     return ListingPublic.model_validate(model, from_attributes=True)
 
 
-def listing_in_to_model(schema: CreateListingRequest, user_id: UUID) -> Listing:
-    return Listing(
+def create_request_to_partial(schema: CreateListingRequest, user_id: UUID) -> ListingPartial:
+    return ListingPartial(
         user_id=user_id,
         **schema.model_dump(by_alias=False)
     )

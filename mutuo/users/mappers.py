@@ -4,7 +4,7 @@ from .schemas import UserPublic
 from .models import User
 
 
-def to_user_public(
+def user_to_public(
     user: User,
     decryption: DecryptFn
 ) -> UserPublic:

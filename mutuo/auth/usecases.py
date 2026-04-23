@@ -9,9 +9,9 @@ from mutuo.security.types import DeterministicHashFn
 from mutuo.cache.protocols import CacheStore
 
 from mutuo.users.schemas import UserPublic
-from mutuo.users.models import User
+from mutuo.users.models import User, UserPartial
 from mutuo.users.types import GetByEmailHashFn, UpdateUserFn, CreateUserFn, GetByIdFn
-from mutuo.users.mappers import to_user_public
+from mutuo.users.mappers import user_to_public
 from mutuo.communications.types import SendEmailFn, CreateVerificationEmailFn
 
 from .schemas import (
@@ -52,7 +52,7 @@ async def register_user_with_verification(
         code_from_user=int(user_in.verification_code)
     )
 
-    prepared_data = User(
+    prepared_data = UserPartial(
         name=cryptography.encrypt(user_in.name),
         email=cryptography.encrypt(user_in.email),
         email_hash=cryptography.deterministic_hash(user_in.email),
@@ -62,7 +62,7 @@ async def register_user_with_verification(
 
     new_user = await create_user(prepared_data)
 
-    return to_user_public(
+    return user_to_public(
         user=new_user,
         decryption=cryptography.decrypt
     )
@@ -133,7 +133,7 @@ async def login(
     if not password_ok:
         raise UnauthorizedException("Incorrect email or password")
     
-    return to_user_public(user=user_exists, decryption=cryptography.decrypt)
+    return user_to_public(user=user_exists, decryption=cryptography.decrypt)
 
 
 async def request_onboarding_email_verification(
@@ -219,7 +219,7 @@ async def update_email(
 
     updated_user = await update_user(user.user_id, update_data)
 
-    return to_user_public(updated_user, cryptography.decrypt)
+    return user_to_public(updated_user, cryptography.decrypt)
 
 
 async def update_password_with_verification_code(
@@ -280,7 +280,7 @@ async def update_password_with_current_password(
 
     updated_user = await update_user(user.user_id, update_data)
 
-    return to_user_public(updated_user, cryptography.decrypt)
+    return user_to_public(updated_user, cryptography.decrypt)
 
 
     

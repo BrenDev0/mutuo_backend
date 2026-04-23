@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from mutuo.cache.redis import RedisCacheStore
 from mutuo.settings import settings
-from mutuo.database.core import engine
+from mutuo.database.sqlalchemy.core import engine
 from mutuo.security.services import DefaultCryptographyService
 from mutuo.security.hashing import hash, compare_hash, deterministic_hash
 from mutuo.security.encryption import encrypt, decrypt
