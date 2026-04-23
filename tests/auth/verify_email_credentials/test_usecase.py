@@ -23,7 +23,6 @@ async def test_success(
     mock_get_user_by_email_hash_fn,
     mock_send_email,
     mock_user,
-    db,
     mock_cache_store,
     mock_create_verification_email
 ):
@@ -33,7 +32,6 @@ async def test_success(
     mock_create_and_send_verification_email.return_value = None
 
     await request_update_credentials_email_verification(
-        db=db,
         cache_store=mock_cache_store,
         email="email",
         deterministic_hash=d_hash,
@@ -49,7 +47,6 @@ async def test_success(
     )
 
     mock_get_user_by_email_hash_fn.assert_called_once_with(
-        db,
         "hashed_email"
     )
 
@@ -74,7 +71,6 @@ async def test_user_not_found(
     mock_cryptography,
     mock_get_user_by_email_hash_fn,
     mock_send_email,
-    db,
     mock_cache_store,
     mock_create_verification_email
 ):
@@ -84,7 +80,6 @@ async def test_user_not_found(
 
     with pytest.raises(NotfoundException) as exc_info:
         await request_update_credentials_email_verification(
-            db=db,
             cache_store=mock_cache_store,
             email="email",
             deterministic_hash=d_hash,
@@ -102,7 +97,6 @@ async def test_user_not_found(
     )
 
     mock_get_user_by_email_hash_fn.assert_called_once_with(
-        db,
         "hashed_email"
     )
 

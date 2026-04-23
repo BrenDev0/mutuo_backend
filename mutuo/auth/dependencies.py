@@ -3,9 +3,10 @@ from uuid import UUID
 
 from mutuo.cache.protocols import CacheStore
 from mutuo.security.encryption import decrypt
-from mutuo.users.repository import get_by_id
 from mutuo.users.mappers import to_user_public
 from mutuo.users.schemas import UserPublic
+from mutuo.users.types import GetByIdFn
+from mutuo.users.sqlalchemy.dependencies import provide_get_by_id
 
 from .schemas import SessionSchema, ProfileType
 
@@ -23,7 +24,8 @@ def get_session_id(
 
 async def get_current_user(
     request: Request,
-    session_id: UUID = Depends(get_session_id)
+    session_id: UUID = Depends(get_session_id),
+    get_by_id: GetByIdFn = Depends(provide_get_by_id)
 ):
     cache_store: CacheStore = request.app.state.cache_store
     session = await cache_store.get(str(session_id))
@@ -38,7 +40,6 @@ async def get_current_user(
 
     if not user_cache:
         user = await get_by_id(
-            db=request.state.db,
             user_id=session.user_id
         )
 

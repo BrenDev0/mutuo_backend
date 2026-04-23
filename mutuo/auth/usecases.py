@@ -1,6 +1,5 @@
 import asyncio
 from uuid import UUID, uuid4
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from mutuo.utils import utc_now
 from mutuo.settings import settings
@@ -115,17 +114,13 @@ async def delete_session(
 
 
 async def login(
-    db: AsyncSession,
     cryptography: CryptographyService,
     credentials: LoginCredentials,
     get_user_by_email_hash: GetByEmailHashFn
 ) -> UserPublic:
     hashed_email = cryptography.deterministic_hash(credentials.email)
 
-    user_exists = await get_user_by_email_hash(
-        db,
-        hashed_email
-    )
+    user_exists = await get_user_by_email_hash(hashed_email)
 
     if not user_exists:
         raise UnauthorizedException("Incorrect email or password")
@@ -142,7 +137,6 @@ async def login(
 
 
 async def request_onboarding_email_verification(
-    db: AsyncSession,
     cache_store: CacheStore,
     email: str,
     deterministic_hash: DeterministicHashFn,
@@ -155,7 +149,7 @@ async def request_onboarding_email_verification(
     
     await ensure_not_blocked_from_verification(hashed_email=hashed_email, cache_store=cache_store)
 
-    email_in_use = await get_user_by_email_hash(db, hashed_email)
+    email_in_use = await get_user_by_email_hash(hashed_email)
 
     if email_in_use:
         raise ConflictException("Email in use")
@@ -170,7 +164,6 @@ async def request_onboarding_email_verification(
     
 
 async def request_update_credentials_email_verification(
-    db: AsyncSession,
     cache_store: CacheStore,
     email: str,
     deterministic_hash: DeterministicHashFn,
@@ -183,7 +176,7 @@ async def request_update_credentials_email_verification(
 
     await ensure_not_blocked_from_verification(hashed_email=hashed_email, cache_store=cache_store)
 
-    user = await get_user_by_email_hash(db, hashed_email)
+    user = await get_user_by_email_hash(hashed_email)
     if user is None:
         raise NotfoundException(detail="User not found")
     
@@ -197,7 +190,6 @@ async def request_update_credentials_email_verification(
     
 
 async def update_email(
-    db: AsyncSession,
     user_id: UUID,
     cryptography: CryptographyService,
     cache_store: CacheStore,
@@ -213,7 +205,7 @@ async def update_email(
         code_from_user=data_in.verification_code
     )
 
-    user: User | None = await get_user_by_id(db, user_id)
+    user: User | None = await get_user_by_id(user_id)
     if user is None:
         raise NotfoundException("User not found")
     
@@ -225,13 +217,12 @@ async def update_email(
         "email_hash": new_email_hash 
     }
 
-    updated_user = await update_user(db, user.user_id, update_data)
+    updated_user = await update_user(user.user_id, update_data)
 
     return to_user_public(updated_user, cryptography.decrypt)
 
 
 async def update_password_with_verification_code(
-    db: AsyncSession,
     cache_store: CacheStore,
     cryptography: CryptographyService,
     data_in: UpdatePasswordWithVerificationCodeRequest,
@@ -246,7 +237,7 @@ async def update_password_with_verification_code(
         code_from_user=data_in.verification_code
     )
 
-    user: User | None = await get_user_by_email_hash(db, email_hash)
+    user: User | None = await get_user_by_email_hash(email_hash)
 
     if not user:
         raise NotfoundException("User not found")
@@ -259,11 +250,10 @@ async def update_password_with_verification_code(
         "password": new_password_hash
     }
 
-    await update_user(db, user.user_id, update_data)
+    await update_user(user.user_id, update_data)
 
 
 async def update_password_with_current_password(
-    db: AsyncSession,
     user_id: UUID,
     cryptography: CryptographyService,
     get_user_by_id: GetByIdFn,
@@ -271,7 +261,7 @@ async def update_password_with_current_password(
     data_in: UpdatePasswordRequest
     
 ):
-    user: User | None = await get_user_by_id(db, user_id)
+    user: User | None = await get_user_by_id(user_id)
 
     if user is None:
         raise NotfoundException("User not found")
@@ -288,7 +278,7 @@ async def update_password_with_current_password(
         "password": new_password_hash
     }
 
-    updated_user = await update_user(db, user.user_id, update_data)
+    updated_user = await update_user(user.user_id, update_data)
 
     return to_user_public(updated_user, cryptography.decrypt)
 

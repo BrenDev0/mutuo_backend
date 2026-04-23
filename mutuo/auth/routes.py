@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Request, Response, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from mutuo.database.dependencies import get_db_session
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
-from mutuo.users.repository import get_by_email_hash, update_by_id, get_by_id
-from mutuo.users.types import CreateUserFn
-from mutuo.users.sqlalchemy.dependencies import provide_create_user
+from mutuo.users.types import CreateUserFn, UpdateUserFn, GetByIdFn, GetByEmailHashFn
+from mutuo.users.sqlalchemy.dependencies import provide_create_user, provide_update_user, provide_get_by_id, provide_get_by_email_hash
 from mutuo.security.dependencies import get_cryptography_service
 from mutuo.security.protocols import CryptographyService
 from mutuo.security.hashing import deterministic_hash
@@ -74,7 +71,7 @@ async def _create_session_and_set_cookie(
 @router.post("/email-verification/onboarding", status_code=200)
 async def auth_request_onboarding_email_verification(
     data: VerifyEmailRequest,
-    db: AsyncSession = Depends(get_db_session),
+    get_by_email_hash: GetByEmailHashFn = Depends(provide_get_by_email_hash),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     """
@@ -93,7 +90,6 @@ async def auth_request_onboarding_email_verification(
     
     """
     await request_onboarding_email_verification(
-        db=db,
         cache_store=cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
@@ -108,7 +104,7 @@ async def auth_request_onboarding_email_verification(
 @router.post("/email-verification/credentials", status_code=200)
 async def auth_request_update_credentials_email_verification(
     data: VerifyEmailRequest,
-    db: AsyncSession = Depends(get_db_session),
+    get_by_email_hash: GetByEmailHashFn = Depends(provide_get_by_email_hash),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
     """
@@ -127,7 +123,6 @@ async def auth_request_update_credentials_email_verification(
     
     """
     await request_update_credentials_email_verification(
-        db=db,
         cache_store=cache_store,
         email=data.email,
         deterministic_hash=deterministic_hash,
@@ -191,7 +186,7 @@ async def auth_login(
     request: Request,
     response: Response,
     data: LoginCredentials,
-    db: AsyncSession = Depends(get_db_session),
+    get_by_email_hash: GetByEmailHashFn = Depends(provide_get_by_email_hash),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
     """
@@ -208,7 +203,6 @@ async def auth_login(
     - **401 UNAUTHORIZED**: if incorrect email or password provided
     """
     user = await login(
-        db=db,
         cryptography=cryptography,
         credentials=data,
         get_user_by_email_hash=get_by_email_hash
@@ -252,7 +246,8 @@ async def auth_logout(
 async def auth_update_email(
     data: UpdateEmailRequest,
     current_user: UserPublic = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session),
+    update_by_id: UpdateUserFn = Depends(provide_update_user),
+    get_by_id: GetByIdFn = Depends(provide_get_by_id),
     cryptography: CryptographyService = Depends(get_cryptography_service),
     cache_store: CacheStore = Depends(get_cache_store),
 ):
@@ -272,7 +267,6 @@ async def auth_update_email(
     - **404 NOT FOUND**: user is not found in db
     """
     return await update_email(
-        db=db,
         user_id=current_user.user_id,
         cryptography=cryptography,
         cache_store=cache_store,
@@ -285,7 +279,8 @@ async def auth_update_email(
 @router.patch("/password", status_code=200, response_model=UserPublic)
 async def auth_update_password(
     data: UpdatePasswordRequest,
-    db: AsyncSession = Depends(get_db_session),
+    update_by_id: UpdateUserFn = Depends(provide_update_user),
+    get_by_id: GetByIdFn = Depends(provide_get_by_id),
     user: UserPublic = Depends(get_current_user),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
@@ -304,7 +299,6 @@ async def auth_update_password(
     - **422 UNPROCESSABLE** if new password same as old password
     """
     return await update_password_with_current_password(
-        db=db,
         user_id=user.user_id,
         cryptography=cryptography,
         get_user_by_id=get_by_id,
@@ -316,7 +310,8 @@ async def auth_update_password(
 @router.patch("/recovery/password", status_code=200)
 async def auth_update_password_with_verification_code(
     data: UpdatePasswordWithVerificationCodeRequest,
-    db: AsyncSession = Depends(get_db_session),
+    update_by_id: UpdateUserFn = Depends(provide_update_user),
+    get_by_email_hash: GetByEmailHashFn = Depends(provide_get_by_email_hash),
     cache_store: CacheStore = Depends(get_cache_store),
     cryptography: CryptographyService = Depends(get_cryptography_service)
 ):
@@ -337,7 +332,6 @@ async def auth_update_password_with_verification_code(
     - **401 UNAUTHORIZED**: If verifcation fails
     """
     await update_password_with_verification_code(
-        db=db,
         cache_store=cache_store,
         cryptography=cryptography,
         data_in=data,

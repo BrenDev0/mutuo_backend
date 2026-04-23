@@ -40,7 +40,7 @@ async def update_by_id(
     db: AsyncSession,
     user_id: UUID,
     changes: dict[str, Any]
-):
+) -> User | None:
     stmt = update(User).where(User.user_id == user_id).values(**changes).returning(User)
     result = await db.execute(stmt)
 

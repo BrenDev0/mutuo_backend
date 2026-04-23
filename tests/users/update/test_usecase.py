@@ -18,7 +18,6 @@ def mock_get_by_id():
 async def test_success(
     mock_cryptography,
     mock_user,
-    db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
@@ -30,7 +29,6 @@ async def test_success(
     mock_cryptography.encrypt.return_value = "encrypted"
 
     result = await handle_update_user(
-        db=db,
         user_id=mock_user.user_id,
         changes=mock_update_request,
         cryptography=mock_cryptography,
@@ -39,16 +37,13 @@ async def test_success(
     )
 
     assert isinstance(result, UserPublic)
-    mock_get_by_id.assert_called_once_with(
-        db,
-        mock_user.user_id
-    )
+    mock_get_by_id.assert_called_once_with(mock_user.user_id)
 
     update_data = {
         "name": "encrypted"
     }
 
-    mock_update_user_by_id.assert_called_once_with(db, mock_user.user_id, update_data)
+    mock_update_user_by_id.assert_called_once_with(mock_user.user_id, update_data)
 
     
 
@@ -56,7 +51,6 @@ async def test_success(
 async def test_user_not_found(
     mock_cryptography,
     mock_user,
-    db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
@@ -67,7 +61,6 @@ async def test_user_not_found(
 
     with pytest.raises(NotfoundException) as exc_info:
         await handle_update_user(
-            db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,
@@ -84,7 +77,6 @@ async def test_user_not_found(
 async def test_empty_request(
     mock_cryptography,
     mock_user,
-    db,
     mock_update_user_by_id,
     mock_get_by_id
 ):
@@ -93,7 +85,6 @@ async def test_empty_request(
 
     with pytest.raises(UnprocessableException) as exc_info:
         await handle_update_user(
-            db=db,
             user_id=mock_user.user_id,
             changes=mock_update_request,
             cryptography=mock_cryptography,

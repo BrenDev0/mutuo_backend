@@ -14,15 +14,14 @@ def mock_verify_email_request():
 @patch("mutuo.auth.routes.request_onboarding_email_verification")
 async def test_success(
     mock_verify_email,
-    mock_request,
     mock_verify_email_request,
     mock_cache_store,
-    db
+    mock_get_user_by_email_hash_fn
 ):
     mock_verify_email.return_value = None
 
     result = await auth_request_onboarding_email_verification(
-        db=db,
+        get_by_email_hash=mock_get_user_by_email_hash_fn,
         data=mock_verify_email_request,
         cache_store=mock_cache_store
     )

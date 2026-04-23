@@ -7,7 +7,6 @@ from mutuo.exceptions import NotfoundException, UnprocessableException
 @patch("mutuo.auth.usecases.verify_code_or_raise")
 async def test_success(
     mock_verify_code_or_raise,
-    db, 
     mock_cache_store,
     mock_cryptography,
     mock_get_user_by_email_hash_fn,
@@ -22,7 +21,6 @@ async def test_success(
     mock_cryptography.hash.return_value = "hashed"
 
     await update_password_with_verification_code(
-        db=db,
         cache_store=mock_cache_store,
         cryptography=mock_cryptography,
         data_in=mock_update_password_with_verification_code_request,
@@ -40,13 +38,12 @@ async def test_success(
         code_from_user=mock_update_password_with_verification_code_request.verification_code
     )
 
-    mock_get_user_by_email_hash_fn.assert_called_once_with(db, "hashed_email")
+    mock_get_user_by_email_hash_fn.assert_called_once_with("hashed_email")
     mock_cryptography.compare_hash.assert_called_once_with(
         mock_update_password_with_verification_code_request.new_password,
         "hashed"
     )
     mock_update_user_fn.assert_called_once_with(
-        db,
         mock_user.user_id,
         {
             "password": "hashed"
@@ -58,7 +55,6 @@ async def test_success(
 @patch("mutuo.auth.usecases.verify_code_or_raise")
 async def test_user_not_found(
     mock_verify_code_or_raise,
-    db, 
     mock_cache_store,
     mock_cryptography,
     mock_get_user_by_email_hash_fn,
@@ -71,7 +67,6 @@ async def test_user_not_found(
 
     with pytest.raises(NotfoundException) as exc_info:
         await update_password_with_verification_code(
-            db=db,
             cache_store=mock_cache_store,
             cryptography=mock_cryptography,
             data_in=mock_update_password_with_verification_code_request,
@@ -90,7 +85,7 @@ async def test_user_not_found(
         code_from_user=mock_update_password_with_verification_code_request.verification_code
     )
 
-    mock_get_user_by_email_hash_fn.assert_called_once_with(db, "hashed_email")
+    mock_get_user_by_email_hash_fn.assert_called_once_with("hashed_email")
     mock_cryptography.compare_hash.assert_not_called()
     mock_update_user_fn.assert_not_called()
 
@@ -99,7 +94,6 @@ async def test_user_not_found(
 @patch("mutuo.auth.usecases.verify_code_or_raise")
 async def test_same_as_current_password(
     mock_verify_code_or_raise,
-    db, 
     mock_cache_store,
     mock_cryptography,
     mock_get_user_by_email_hash_fn,
@@ -114,7 +108,6 @@ async def test_same_as_current_password(
 
     with pytest.raises(UnprocessableException) as exc_info:
         await update_password_with_verification_code(
-            db=db,
             cache_store=mock_cache_store,
             cryptography=mock_cryptography,
             data_in=mock_update_password_with_verification_code_request,
@@ -134,7 +127,7 @@ async def test_same_as_current_password(
         code_from_user=mock_update_password_with_verification_code_request.verification_code
     )
 
-    mock_get_user_by_email_hash_fn.assert_called_once_with(db, "hashed_email")
+    mock_get_user_by_email_hash_fn.assert_called_once_with("hashed_email")
     mock_cryptography.compare_hash.assert_called_once_with(
         mock_update_password_with_verification_code_request.new_password,
         "hashed"
