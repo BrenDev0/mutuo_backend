@@ -18,7 +18,7 @@ def provide_create_listing(db: AsyncSession = Depends(get_db_session)) -> Create
 
 
 def provide_get_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetByUserIdFn:
-    async def get_listing_by_user_id(user_id: UUID, offset: int, limit: int, filters: dict[str, Any] | None = None):
+    async def get_listing_by_user_id(user_id: UUID, offset: int, limit: int, filters: dict[str, Any] | None = None) -> list[Listing]:
         return await get_by_user_id(
             db=db,
             user_id=user_id,
