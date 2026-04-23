@@ -3,7 +3,7 @@ from uuid import UUID
 
 from mutuo.cache.protocols import CacheStore
 from mutuo.security.encryption import decrypt
-from mutuo.users.mappers import to_user_public
+from mutuo.users.mappers import user_to_public
 from mutuo.users.schemas import UserPublic
 from mutuo.users.types import GetByIdFn
 from mutuo.users.sqlalchemy.dependencies import provide_get_by_id
@@ -44,7 +44,7 @@ async def get_current_user(
         if not user:
             raise HTTPException(status_code=400, detail="Unauthorized")
         
-        user_public = to_user_public(
+        user_public = user_to_public(
             user=user,
             decryption=decrypt
         )

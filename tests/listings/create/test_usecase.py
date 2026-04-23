@@ -2,7 +2,7 @@ import pytest
 
 from mutuo.listings.usecases import handle_create_listing
 from mutuo.listings.schemas import ListingPublic
-from mutuo.listings.models import Listing
+from mutuo.listings.models import ListingPartial
 
 @pytest.mark.asyncio
 async def test_success(
@@ -27,7 +27,7 @@ async def test_success(
     called_listing = mock_create.await_args.args[0]
 
 
-    assert isinstance(called_listing, Listing)
+    assert isinstance(called_listing, ListingPartial)
     assert called_listing.name == "mock"
     assert called_listing.description == "mock description"
     assert called_listing.address == "1234 mock"

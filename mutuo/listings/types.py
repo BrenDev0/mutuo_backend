@@ -2,9 +2,9 @@ from typing import Callable, Awaitable, Any
 from uuid import UUID
 from dataclasses import dataclass
 
-from .models import Listing
+from .models import Listing, ListingPartial
 
-CreateListingFn = Callable[[Listing], Awaitable[Listing]]
+CreateListingFn = Callable[[ListingPartial], Awaitable[Listing]]
 
 @dataclass(frozen=True)
 class UserListingQuery:

@@ -8,10 +8,10 @@ from mutuo.database.dependencies import get_db_session
 
 from .repository import create, update_by_id, get_by_id, get_by_email_hash, delete_by_id
 from ..types import CreateUserFn, UpdateUserFn, GetByIdFn, GetByEmailHashFn, DeleteByIdFn
-from ..models import User 
+from ..models import User, UserPartial
 
 def provide_create_user(db: AsyncSession = Depends(get_db_session)) -> CreateUserFn:
-    async def create_user(user_in: User) -> User:
+    async def create_user(user_in: UserPartial) -> User:
         return await create(db=db, user_in=user_in)
     
     return create_user

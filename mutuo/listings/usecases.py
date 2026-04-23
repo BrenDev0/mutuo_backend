@@ -4,19 +4,19 @@ from mutuo.schemas import Pagination
 
 from .types import CreateListingFn, GetByUserIdFn, UserListingQuery
 from .schemas import CreateListingRequest, ListingPublic, ListingFilters, ListingPage
-from .mappers import listing_in_to_model, model_to_listing_public
-from .models import Listing
+from .mappers import listing_to_public, create_request_to_partial
+
 
 async def handle_create_listing(
     user_id: UUID,
     listing_in: CreateListingRequest, 
     create_listing: CreateListingFn
 ) -> ListingPublic:
-    listing_data: Listing = listing_in_to_model(schema=listing_in, user_id=user_id)
+    listing_data = create_request_to_partial(schema=listing_in, user_id=user_id)
    
     new_listing = await create_listing(listing_data)
 
-    return model_to_listing_public(model=new_listing)
+    return listing_to_public(model=new_listing)
 
 
 async def get_user_owned_listings(
@@ -44,7 +44,7 @@ async def get_user_owned_listings(
     return ListingPage(
         **pagination.model_dump(),
         items=[
-            model_to_listing_public(listing)
+            listing_to_public(listing)
             for listing in listings
         ]
     )

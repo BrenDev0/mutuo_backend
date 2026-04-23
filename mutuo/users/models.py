@@ -1,18 +1,25 @@
-import uuid
-from sqlalchemy import String
-from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy.dialects.postgresql import UUID
-
-from mutuo.database.models import Base, TimeStampMixin
+from uuid import UUID
+from dataclasses import dataclass
+from datetime import datetime
 
 
-class User(Base, TimeStampMixin):
-    __tablename__ = "users"
+@dataclass(frozen=True)
+class User:
+    user_id: UUID
+    name: str
+    email: str
+    email_hash: str
+    password: str
+    profile_type: str
+    created_at: datetime
 
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, nullable=False)
-    email_hash: Mapped[str] = mapped_column(String, nullable=False)
-    password: Mapped[str] = mapped_column(String, nullable=False)
-    profile_type: Mapped[str] = mapped_column(String, nullable=False)
+
+@dataclass(frozen=True)
+class UserPartial:
+    name: str
+    email: str
+    email_hash: str
+    password: str
+    profile_type: str
+
 
