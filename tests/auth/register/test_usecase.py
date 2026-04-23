@@ -12,7 +12,6 @@ def mock_create_fn():
 
 @pytest.mark.asyncio
 async def test_success(
-    db,
     mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
@@ -24,7 +23,6 @@ async def test_success(
     mock_create_fn.return_value = mock_user
 
     result = await register_user_with_verification(
-        db=db,
         user_in=mock_create_user_schema,
         cryptography=mock_cryptography,
         create_user=mock_create_fn,
@@ -44,8 +42,7 @@ async def test_incorrect_verification_code(
     mock_cache_store,
     mock_cryptography,
     mock_create_user_schema,
-    mock_create_fn,
-    db
+    mock_create_fn
 ):
     mock_cache_store.get.side_effect = [None, 1333]
     mock_cache_store.increment.return_value = 1
@@ -53,7 +50,6 @@ async def test_incorrect_verification_code(
 
     with pytest.raises(UnauthorizedException) as exc: 
         await register_user_with_verification(
-            db=db,
             user_in=mock_create_user_schema,
             cryptography=mock_cryptography,
             create_user=mock_create_fn,
@@ -68,14 +64,12 @@ async def test_max_attemps_blocked(
     mock_cryptography,
     mock_create_user_schema,
     mock_create_fn,
-    db
 ):
     mock_cache_store.get.return_value = 1
 
 
     with pytest.raises(UnauthorizedException) as exc: 
         await register_user_with_verification(
-            db=db,
             user_in=mock_create_user_schema,
             cryptography=mock_cryptography,
             create_user=mock_create_fn,
@@ -91,15 +85,13 @@ async def test_expired_code(
     mock_cache_store,
     mock_cryptography,
     mock_create_user_schema,
-    mock_create_fn,
-    db
+    mock_create_fn
 ):
     mock_cache_store.get.side_effect = [None, None]
 
 
     with pytest.raises(UnauthorizedException) as exc: 
         await register_user_with_verification(
-            db=db,
             user_in=mock_create_user_schema,
             cryptography=mock_cryptography,
             create_user=mock_create_fn,

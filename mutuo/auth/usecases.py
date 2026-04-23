@@ -41,7 +41,6 @@ async def _create_and_send_verification_email(
 
 
 async def register_user_with_verification(
-    db: AsyncSession,
     user_in: RegisterUserRequest,
     cryptography: CryptographyService,
     cache_store: CacheStore,
@@ -62,11 +61,7 @@ async def register_user_with_verification(
         profile_type=user_in.profile_type
     )
 
-    new_user = await create_user(
-        db,
-        prepared_data
-    )
-
+    new_user = await create_user(prepared_data)
 
     return to_user_public(
         user=new_user,

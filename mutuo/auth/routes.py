@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mutuo.database.dependencies import get_db_session
 from mutuo.settings import settings
 from mutuo.users.schemas import UserPublic
-from mutuo.users.repository import get_by_email_hash, create, update_by_id, get_by_id
+from mutuo.users.repository import get_by_email_hash, update_by_id, get_by_id
+from mutuo.users.types import CreateUserFn
+from mutuo.users.sqlalchemy.dependencies import provide_create_user
 from mutuo.security.dependencies import get_cryptography_service
 from mutuo.security.protocols import CryptographyService
 from mutuo.security.hashing import deterministic_hash
@@ -21,6 +23,7 @@ from .schemas import (
     UpdatePasswordRequest,
     UpdatePasswordWithVerificationCodeRequest
 )
+
 from .usecases import (
     login, 
     create_session, 
@@ -141,7 +144,7 @@ async def auth_register(
     request: Request,
     response: Response,
     data: RegisterUserRequest,
-    db: AsyncSession = Depends(get_db_session),
+    create_user: CreateUserFn = Depends(provide_create_user),
     cryptography: CryptographyService = Depends(get_cryptography_service),
     cache_store: CacheStore = Depends(get_cache_store)
 ):
@@ -167,9 +170,8 @@ async def auth_register(
 
     """
     new_user = await register_user_with_verification(
-        db=db,
         user_in=data,
-        create_user=create,
+        create_user=create_user,
         cryptography=cryptography, 
         cache_store=cache_store
     )
