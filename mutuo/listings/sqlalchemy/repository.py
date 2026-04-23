@@ -1,12 +1,11 @@
 from uuid import UUID
+from typing import Any
 
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mutuo.schemas import Pagination
+from ..models import Listing
 
-from .schemas import ListingFilters
-from .models import Listing
 
 async def create(db: AsyncSession, listing_in: Listing) -> Listing:
     db.add(listing_in)
@@ -15,7 +14,7 @@ async def create(db: AsyncSession, listing_in: Listing) -> Listing:
     return listing_in
 
 
-async def get_listing_by_id(
+async def get_by_id(
     db: AsyncSession,
     lisitng_id: UUID,
     user_id: UUID
@@ -27,20 +26,20 @@ async def get_listing_by_id(
     return result.scalar_one_or_none()
 
 
-async def filter_and_page_listings(
+async def get_by_user_id(
     db: AsyncSession, 
     user_id: UUID, 
-    pagination: Pagination,
-    filters: ListingFilters | None = None
+    offset: int,
+    limit: int,
+    filters: dict[str, Any] | None = None
 ) -> list[Listing]:
-    offset = (pagination.page_number - 1) * pagination.items_per_page
     stmt = select(Listing).where(Listing.user_id == user_id)
 
     if filters:
-        for k, v in filters.model_dump(exclude_none=True).items():
+        for k, v in filters.items():
             stmt = stmt.where(getattr(Listing, k) == v)
 
-    stmt = stmt.limit(pagination.items_per_page).offset(offset)
+    stmt = stmt.limit(limit).offset(offset)
 
     result = await db.execute(stmt)
 
@@ -51,7 +50,7 @@ async def update_by_id(
     db: AsyncSession,
     listing_id: UUID,
     user_id: UUID,
-    changes: dict[str, str | int | float]
+    changes: dict[str, Any]
 ) -> Listing | None:
     stmt = update(Listing).where(Listing.user_id == user_id).where(Listing.listing_id == listing_id).values(**changes).returning(Listing)
 

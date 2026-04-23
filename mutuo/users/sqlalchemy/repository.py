@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import User
+from ..models import User
 
 
 async def create(
@@ -40,11 +40,11 @@ async def update_by_id(
     db: AsyncSession,
     user_id: UUID,
     changes: dict[str, Any]
-):
+) -> User:
     stmt = update(User).where(User.user_id == user_id).values(**changes).returning(User)
     result = await db.execute(stmt)
 
-    return result.scalar_one_or_none()
+    return result.scalar_one()
 
 
 async def delete_by_id(

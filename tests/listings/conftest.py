@@ -1,14 +1,22 @@
 import pytest
 from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock
 
 from mutuo.listings.schemas import ListingPublic, CreateListingRequest
 from mutuo.listings.models import Listing
+
+@pytest.fixture
+def mock_create():
+    return AsyncMock()
+
+
 
 
 @pytest.fixture
 def mock_listing_in():
     return CreateListingRequest(
+        property_type="CASA",
         name="mock",
         description="mock description",
         address="1234 mock",
@@ -24,6 +32,7 @@ def mock_listing():
     return Listing(
         listing_id=uuid4(),
         user_id=uuid4(),
+        property_type="CASA",
         name="mock",
         description="mock description",
         address="1234 mock st",

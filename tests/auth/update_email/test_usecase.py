@@ -14,7 +14,6 @@ async def test_success(
     mock_update_user_fn,
     mock_get_user_by_id_fn,
     mock_user,
-    db,
     mock_update_email_req
 ):
     mock_verify_code_or_raise.return_value = None
@@ -24,7 +23,6 @@ async def test_success(
     mock_cryptography.encrypt.return_value = "encrypted"
     
     result = await update_email(
-        db=db,
         user_id=mock_user.user_id,
         cryptography=mock_cryptography,
         cache_store=mock_cache_store,
@@ -40,10 +38,9 @@ async def test_success(
         hashed_email="hashed_email",
         code_from_user=123456
     )
-    mock_get_user_by_id_fn.assert_called_once_with(db, mock_user.user_id)
+    mock_get_user_by_id_fn.assert_called_once_with(mock_user.user_id)
     mock_cryptography.encrypt.assert_called_once_with("email")  
     mock_update_user_fn.assert_awaited_once_with(
-        db,
         mock_user.user_id,
         {
             "email": "encrypted",
@@ -61,7 +58,6 @@ async def test_user_not_found(
     mock_update_user_fn,
     mock_get_user_by_id_fn,
     mock_user,
-    db,
     mock_update_email_req
 ):
     mock_verify_code_or_raise.return_value = None
@@ -72,7 +68,6 @@ async def test_user_not_found(
     with pytest.raises(NotfoundException) as exc_info:
 
         await update_email(
-            db=db,
             user_id=mock_user.user_id,
             cryptography=mock_cryptography,
             cache_store=mock_cache_store,
@@ -89,6 +84,6 @@ async def test_user_not_found(
         hashed_email="hashed_email",
         code_from_user=123456
     )
-    mock_get_user_by_id_fn.assert_called_once_with(db, mock_user.user_id)
+    mock_get_user_by_id_fn.assert_called_once_with(mock_user.user_id)
     mock_cryptography.encrypt.assert_not_called() 
     mock_update_user_fn.assert_not_called()

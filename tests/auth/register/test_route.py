@@ -1,11 +1,15 @@
 import pytest
 from mutuo.auth.routes import auth_register
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from uuid import uuid4
 from mutuo.users.schemas import UserPublic
 from mutuo.settings import settings
 from mutuo.auth.schemas import SessionContext
 
+
+@pytest.fixture
+def mock_create_user_repo():
+    return AsyncMock()
 
 @pytest.mark.asyncio
 @patch("mutuo.auth.routes.create_session")
@@ -18,7 +22,8 @@ async def test_success(
     mock_create_user_schema,
     mock_cache_store,
     mock_user_public,
-    mock_cryptography
+    mock_cryptography,
+    mock_create_user_repo
 ):
     session_id = uuid4()
     mock_create_user.return_value = mock_user_public
@@ -34,6 +39,7 @@ async def test_success(
     result = await auth_register(
         request=mock_request,
         response=mock_response,
+        create_user=mock_create_user_repo,
         data=mock_create_user_schema,
         cryptography=mock_cryptography,
         cache_store=mock_cache_store

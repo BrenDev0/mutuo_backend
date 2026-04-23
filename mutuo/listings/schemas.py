@@ -9,8 +9,17 @@ class ListingStatus(StrEnum):
     UNAVAILABLE = "NO DISPONIBLE"
 
 
+class PropertyType(StrEnum):
+    HOUSE = "CASA"
+    APARTMENT = "DEPARTAMENTO"
+    LAND = "TERRENO"
+    COMMERCIAL = "LOCAL"
+    BUILDING = "EDIFICIO"
+    CONDO = "CONDOMINIO"
+
 
 class CreateListingRequest(MutuoSchemaBase):
+    property_type: PropertyType
     name: str
     description: str
     address: str
@@ -23,6 +32,7 @@ class CreateListingRequest(MutuoSchemaBase):
 class ListingPublic(MutuoSchemaBase):
     listing_id: UUID
     user_id: UUID
+    property_type: str
     name: str
     description: str
     address: str
@@ -38,6 +48,7 @@ class ListingPage(Pagination):
 
 
 class ListingFilters(MutuoSchemaBase):
+    property_type: str | None
     name: str | None = None
     beds: str | None = None
     baths: str | None = None

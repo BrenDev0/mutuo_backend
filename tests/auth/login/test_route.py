@@ -18,8 +18,8 @@ async def test_success(
     mock_request,
     mock_response,
     mock_credentials,
-    db,
-    mock_cryptography
+    mock_cryptography,
+    mock_get_user_by_email_hash_fn
 ):
     mock_session_id = uuid4()
     mock_login.return_value = mock_user_public
@@ -33,7 +33,7 @@ async def test_success(
         request=mock_request,
         response=mock_response,
         data=mock_credentials,
-        db=db,
+        get_by_email_hash=mock_get_user_by_email_hash_fn,
         cryptography=mock_cryptography
     )
 

@@ -13,6 +13,6 @@ class MutuoSchemaBase(BaseModel):
     )
 
 
-class Pagination(BaseModel):
+class Pagination(MutuoSchemaBase):
     items_per_page: int
     page_number: int

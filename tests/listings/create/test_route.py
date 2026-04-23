@@ -10,14 +10,14 @@ from mutuo.listings.schemas import ListingPublic
 async def test_success(
     mock_usecase,
     mock_listing_in,
-    db,
     mock_user_public,
-    mock_listing_public
+    mock_listing_public,
+    mock_create
 ):
     mock_usecase.return_value = mock_listing_public
     result = await listings_create(
         data=mock_listing_in,
-        db=db,
+        create_listing=mock_create,
         user=mock_user_public
     )
 

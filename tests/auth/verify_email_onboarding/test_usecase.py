@@ -17,7 +17,6 @@ def mock_send_email():
 
 @pytest.mark.asyncio
 async def test_success(
-    db,
     mock_cryptography,
     mock_get_by_email_fn,
     mock_send_email,
@@ -28,7 +27,6 @@ async def test_success(
     mock_cache_store.get.return_value = None
 
     await request_onboarding_email_verification(
-        db=db,
         cache_store=mock_cache_store,
         email="email",
         deterministic_hash=mock_cryptography.deterministic_hash,
@@ -47,7 +45,6 @@ async def test_email_in_use(
     mock_cryptography,
     mock_send_email,
     mock_get_by_email_fn,
-    db,
     mock_cache_store,
     mock_create_verify_email_message
 ):
@@ -56,7 +53,6 @@ async def test_email_in_use(
 
     with pytest.raises(ConflictException) as exc_info:
         await request_onboarding_email_verification(
-            db=db,
             cache_store=mock_cache_store,
             email="email",
             deterministic_hash=mock_cryptography.deterministic_hash,
@@ -76,7 +72,6 @@ async def test_max_attemts(
     mock_cryptography,
     mock_send_email,
     mock_get_by_email_fn,
-    db,
     mock_cache_store,
     mock_create_verify_email_message
 ):
@@ -85,7 +80,6 @@ async def test_max_attemts(
 
     with pytest.raises(UnauthorizedException) as exc_info:
         await request_onboarding_email_verification(
-            db=db,
             cache_store=mock_cache_store,
             email="email",
             deterministic_hash=mock_cryptography.deterministic_hash,

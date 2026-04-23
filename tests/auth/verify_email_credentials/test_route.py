@@ -7,9 +7,8 @@ from mutuo.auth.schemas import VerifyEmailRequest
 @patch("mutuo.auth.routes.request_update_credentials_email_verification")
 async def test_success(
     mock_usecase,
-    mock_request,
+    mock_get_user_by_email_hash_fn,
     mock_cache_store,
-    db
 ):
     mock_usecase.return_value = None
     mock_verify_email_request = VerifyEmailRequest(
@@ -17,7 +16,7 @@ async def test_success(
     )
 
     result = await auth_request_update_credentials_email_verification(
-        db=db,
+        get_by_email_hash=mock_get_user_by_email_hash_fn,
         data=mock_verify_email_request,
         cache_store=mock_cache_store
     )
