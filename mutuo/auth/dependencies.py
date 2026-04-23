@@ -39,9 +39,7 @@ async def get_current_user(
     user_cache = await cache_store.get(user_cache_key)
 
     if not user_cache:
-        user = await get_by_id(
-            user_id=session.user_id
-        )
+        user = await get_by_id(session.user_id)
 
         if not user:
             raise HTTPException(status_code=400, detail="Unauthorized")

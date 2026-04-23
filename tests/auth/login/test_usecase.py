@@ -1,6 +1,4 @@
 import pytest
-from unittest.mock import AsyncMock
-
 from mutuo.auth.usecases import login
 from mutuo.users.schemas import UserPublic
 from mutuo.exceptions import UnauthorizedException

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 from mutuo.auth.dependencies import user_is_owner
-from mutuo.schemas import Pagination
 from mutuo.users.schemas import UserPublic
 
-from .schemas import CreateListingRequest, ListingPublic, ListingPage, ListingFilters
+from .schemas import CreateListingRequest, ListingPublic
 from .usecases import handle_create_listing
 from .sqlalchemy.dependencies import provide_create_listing
 from .types import CreateListingFn

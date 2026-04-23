@@ -74,6 +74,11 @@ def mock_get_user_by_email_hash_fn():
     return AsyncMock()
 
 
+@pytest.fixture
+def mock_delete_user_by_id_fn():
+    return AsyncMock()
+
+
 
 @pytest.fixture(autouse=True)
 def reset_mocks(mock_cryptography):

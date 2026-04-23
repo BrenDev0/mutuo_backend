@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import AsyncMock
 from mutuo.auth.schemas import LoginCredentials, SessionContext
 from mutuo.auth.schemas import RegisterUserRequest
 
