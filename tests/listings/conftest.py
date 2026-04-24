@@ -11,7 +11,9 @@ def mock_create():
     return AsyncMock()
 
 
-
+@pytest.fixture
+def mock_get_by_user_id():
+    return AsyncMock()
 
 @pytest.fixture
 def mock_listing_in():
