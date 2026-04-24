@@ -1,12 +1,14 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from mutuo.auth.dependencies import user_is_owner
 from mutuo.users.schemas import UserPublic
 from mutuo.schemas import Pagination
 
 from .schemas import CreateListingRequest, ListingPublic, ListingPage, ListingFilters
-from .usecases import handle_create_listing, get_user_owned_listings
-from .sqlalchemy.dependencies import provide_create_listing, provide_get_by_user_id
-from .types import CreateListingFn, GetListingsByUserIdFn
+from .usecases import handle_create_listing, get_user_owned_listings, handle_delete_listing
+from .sqlalchemy.dependencies import provide_create_listing, provide_get_listings_by_user_id, provide_delete_listing_by_id
+from .types import CreateListingFn, GetListingsByUserIdFn, DeleteListingById
 
 router = APIRouter(
     tags=["Listings"]
@@ -46,12 +48,25 @@ async def listings_owners_collection(
     pagination: Pagination,
     filters: ListingFilters | None = None,
     user: UserPublic = Depends(user_is_owner),
-    get_by_user_id: GetListingsByUserIdFn = Depends(provide_get_by_user_id)
+    get_by_user_id: GetListingsByUserIdFn = Depends(provide_get_listings_by_user_id)
 ):
     return await get_user_owned_listings(
         user_id=user.user_id,
         pagination=pagination,
         get_by_user_id=get_by_user_id,
         filters=filters
+    )
+
+
+@router.delete("/{listing_id}", status_code=200, response_model=ListingPublic)
+async def listings_delete(
+    listing_id: UUID,
+    user: UserPublic = Depends(user_is_owner),
+    delete_listing_by_id: DeleteListingById = Depends(provide_delete_listing_by_id)
+):
+    return await handle_delete_listing(
+        user_id=user.user_id,
+        listing_id=listing_id,
+        delete_listing_by_id=delete_listing_by_id
     )
 
