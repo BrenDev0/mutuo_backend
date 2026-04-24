@@ -257,10 +257,10 @@ async def auth_update_email(
     **Must call auth/email-verification/credentials before calling this endpoint**
 
     ### Args: 
-        - **newEmail**: the email that verification was sent to in verification request
-        - **verificationCode**: Code from verification email
+    - **newEmail**: the email that verification was sent to in verification request
+    - **verificationCode**: Code from verification email
     ### Returns:
-        - **200**: UserPublic schema
+    - **200**: UserPublic schema
 
     ### Raises:
     - **401 UNAUTHORIZED**: if code exipred or invalid, or user has reached max attempts
