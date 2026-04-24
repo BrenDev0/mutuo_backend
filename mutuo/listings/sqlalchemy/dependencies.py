@@ -4,7 +4,7 @@ from mutuo.database.dependencies import get_db_session
 
 from .repository import create, get_by_user_id
 from ..models import Listing, ListingPartial
-from ..types import GetByUserIdFn, CreateListingFn, UserListingQuery
+from ..types import GetListingsByUserIdFn, CreateListingFn, UserListingQuery
 
 
 def provide_create_listing(db: AsyncSession = Depends(get_db_session)) -> CreateListingFn:
@@ -14,7 +14,7 @@ def provide_create_listing(db: AsyncSession = Depends(get_db_session)) -> Create
     return create_listing
 
 
-def provide_get_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetByUserIdFn:
+def provide_get_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetListingsByUserIdFn:
     async def get_listing_by_user_id(query: UserListingQuery) -> list[Listing]:
         return await get_by_user_id(
             db=db,

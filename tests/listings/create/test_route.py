@@ -12,12 +12,12 @@ async def test_success(
     mock_listing_in,
     mock_user_public,
     mock_listing_public,
-    mock_create
+    mock_create_listing
 ):
     mock_usecase.return_value = mock_listing_public
     result = await listings_create(
         data=mock_listing_in,
-        create_listing=mock_create,
+        create_listing=mock_create_listing,
         user=mock_user_public
     )
 

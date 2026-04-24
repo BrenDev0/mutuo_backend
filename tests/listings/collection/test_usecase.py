@@ -52,7 +52,7 @@ mock_collection = [
 
 @pytest.mark.asyncio
 async def test_success(
-    mock_get_by_user_id
+    mock_get_listings_by_user_id
 
 ):
     mock_page = Pagination(
@@ -61,18 +61,18 @@ async def test_success(
     )
 
     user_id = uuid4()
-    mock_get_by_user_id.return_value = mock_collection
+    mock_get_listings_by_user_id.return_value = mock_collection
     result = await get_user_owned_listings(
         user_id=user_id,
         pagination=mock_page,
-        get_by_user_id=mock_get_by_user_id
+        get_by_user_id=mock_get_listings_by_user_id
     )
 
     assert isinstance(result, ListingPage)
     assert hasattr(result, "items")
     assert len(result.items) == 3
 
-    called_query = mock_get_by_user_id.await_args.args[0]
+    called_query = mock_get_listings_by_user_id.await_args.args[0]
 
     assert isinstance(called_query, UserListingQuery)
     assert hasattr(called_query, "user_id")
@@ -86,7 +86,7 @@ async def test_success(
 
 @pytest.mark.asyncio
 async def test_no_results(
-    mock_get_by_user_id
+    mock_get_listings_by_user_id
 
 ):
     mock_page = Pagination(
@@ -95,18 +95,18 @@ async def test_no_results(
     )
 
     user_id = uuid4()
-    mock_get_by_user_id.return_value = list()
+    mock_get_listings_by_user_id.return_value = list()
     result = await get_user_owned_listings(
         user_id=user_id,
         pagination=mock_page,
-        get_by_user_id=mock_get_by_user_id
+        get_by_user_id=mock_get_listings_by_user_id
     )
 
     assert isinstance(result, ListingPage)
     assert hasattr(result, "items")
     assert len(result.items) == 0
 
-    called_query = mock_get_by_user_id.await_args.args[0]
+    called_query = mock_get_listings_by_user_id.await_args.args[0]
 
     assert isinstance(called_query, UserListingQuery)
     assert hasattr(called_query, "user_id")
