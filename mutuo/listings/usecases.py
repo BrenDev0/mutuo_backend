@@ -2,7 +2,7 @@ from uuid import UUID
 
 from mutuo.schemas import Pagination
 
-from .types import CreateListingFn, GetByUserIdFn, UserListingQuery
+from .types import CreateListingFn, GetListingsByUserIdFn, UserListingQuery
 from .schemas import CreateListingRequest, ListingPublic, ListingFilters, ListingPage
 from .mappers import listing_to_public, create_request_to_partial
 
@@ -22,7 +22,7 @@ async def handle_create_listing(
 async def get_user_owned_listings(
     user_id: UUID,
     pagination: Pagination,
-    get_by_user_id: GetByUserIdFn,
+    get_by_user_id: GetListingsByUserIdFn,
     filters: ListingFilters | None = None,
     
 ) -> ListingPage:

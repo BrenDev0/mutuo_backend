@@ -14,4 +14,4 @@ class UserListingQuery:
     filters: dict[str, Any] | None = None
 
 
-GetByUserIdFn = Callable[[UserListingQuery], Awaitable[list[Listing]]]
+GetListingsByUserIdFn = Callable[[UserListingQuery], Awaitable[list[Listing]]]

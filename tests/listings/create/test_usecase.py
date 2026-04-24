@@ -7,24 +7,24 @@ from mutuo.listings.models import ListingPartial
 @pytest.mark.asyncio
 async def test_success(
     mock_listing,
-    mock_create,
+    mock_create_listing,
     mock_listing_in
 ):
     
-    mock_create.return_value = mock_listing
+    mock_create_listing.return_value = mock_listing
 
 
     result = await handle_create_listing(
         user_id=mock_listing.user_id,
         listing_in=mock_listing_in,
-        create_listing=mock_create
+        create_listing=mock_create_listing
     )
 
 
     assert isinstance(result, ListingPublic)
-    mock_create.assert_called_once()
+    mock_create_listing.assert_called_once()
 
-    called_listing = mock_create.await_args.args[0]
+    called_listing = mock_create_listing.await_args.args[0]
 
 
     assert isinstance(called_listing, ListingPartial)

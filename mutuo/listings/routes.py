@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
 from mutuo.auth.dependencies import user_is_owner
 from mutuo.users.schemas import UserPublic
+from mutuo.schemas import Pagination
 
-from .schemas import CreateListingRequest, ListingPublic
-from .usecases import handle_create_listing
-from .sqlalchemy.dependencies import provide_create_listing
-from .types import CreateListingFn
+from .schemas import CreateListingRequest, ListingPublic, ListingPage, ListingFilters
+from .usecases import handle_create_listing, get_user_owned_listings
+from .sqlalchemy.dependencies import provide_create_listing, provide_get_by_user_id
+from .types import CreateListingFn, GetListingsByUserIdFn
 
 router = APIRouter(
     tags=["Listings"]
@@ -40,12 +41,17 @@ async def listings_create(
     )
 
 
-# @router.get("", status_code=200, response_model=ListingPage)
-# async def Listings_collection(
-#     pagination: Pagination,
-#     filters: ListingFilters | None = None,
-#     db: AsyncSession = Depends(get_db_session),
-#     user: UserPublic = Depends(user_is_owner)
-# ):
-#     pass
+@router.get("", status_code=200, response_model=ListingPage)
+async def listings_owners_collection(
+    pagination: Pagination,
+    filters: ListingFilters | None = None,
+    user: UserPublic = Depends(user_is_owner),
+    get_by_user_id: GetListingsByUserIdFn = Depends(provide_get_by_user_id)
+):
+    return await get_user_owned_listings(
+        user_id=user.user_id,
+        pagination=pagination,
+        get_by_user_id=get_by_user_id,
+        filters=filters
+    )
 
