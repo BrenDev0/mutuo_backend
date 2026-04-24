@@ -2,7 +2,7 @@ import pytest
 from uuid import uuid4
 from datetime import datetime
 from unittest.mock import patch
-from mutuo.listings.routes import Listings_collection
+from mutuo.listings.routes import listings_owners_collection
 from mutuo.listings.schemas import ListingPage, ListingPublic
 from mutuo.schemas import Pagination
 
@@ -50,7 +50,7 @@ async def test_success(
 
     mock_usecase.return_value = mock_page
 
-    result = await Listings_collection(
+    result = await listings_owners_collection(
         pagination=Pagination(items_per_page=10, page_number=2),
         user=mock_user_public,
         get_by_user_id=mock_get_listings_by_user_id,

@@ -42,7 +42,7 @@ async def listings_create(
 
 
 @router.get("", status_code=200, response_model=ListingPage)
-async def Listings_collection(
+async def listings_owners_collection(
     pagination: Pagination,
     filters: ListingFilters | None = None,
     user: UserPublic = Depends(user_is_owner),
