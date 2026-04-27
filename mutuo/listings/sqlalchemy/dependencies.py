@@ -2,19 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from mutuo.database.dependencies import get_db_session
 
-from .repository import create, get_by_user_id
+from .repository import create, get_by_user_id, delete_by_id
 from ..models import Listing, ListingPartial
-from ..types import GetListingsByUserIdFn, CreateListingFn, UserListingQuery
+from ..types import GetListingsByUserIdFn, CreateListingFn, UserListingQuery, DeleteListingById, DeleteListingCommand
 
 
 def provide_create_listing(db: AsyncSession = Depends(get_db_session)) -> CreateListingFn:
     async def create_listing(listing_in: ListingPartial) -> Listing:
-        return  await create(db=db, listing_in=listing_in)
+        return await create(db=db, listing_in=listing_in)
     
     return create_listing
 
 
-def provide_get_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetListingsByUserIdFn:
+def provide_get_listings_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetListingsByUserIdFn:
     async def get_listing_by_user_id(query: UserListingQuery) -> list[Listing]:
         return await get_by_user_id(
             db=db,
@@ -25,5 +25,12 @@ def provide_get_by_user_id(db: AsyncSession = Depends(get_db_session)) -> GetLis
         )
     
     return get_listing_by_user_id
+
+
+def provide_delete_listing_by_id(db: AsyncSession = Depends(get_db_session)) -> DeleteListingById:
+    async def delete_listing_by_id(command: DeleteListingCommand) -> Listing | None:
+        return await delete_by_id(db=db, listing_id=command.listing_id, user_id=command.user_id)
+    
+    return delete_listing_by_id
         
 

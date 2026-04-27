@@ -15,6 +15,12 @@ def mock_create_listing():
 def mock_get_listings_by_user_id():
     return AsyncMock()
 
+
+@pytest.fixture
+def mock_delete_listing_by_id():
+    return AsyncMock()
+
+
 @pytest.fixture
 def mock_listing_in():
     return CreateListingRequest(

@@ -6,6 +6,7 @@ from .models import Listing, ListingPartial
 
 CreateListingFn = Callable[[ListingPartial], Awaitable[Listing]]
 
+
 @dataclass(frozen=True)
 class UserListingQuery:
     user_id: UUID
@@ -13,5 +14,12 @@ class UserListingQuery:
     limit: int
     filters: dict[str, Any] | None = None
 
-
 GetListingsByUserIdFn = Callable[[UserListingQuery], Awaitable[list[Listing]]]
+
+
+@dataclass(frozen=True)
+class DeleteListingCommand:
+    user_id: UUID
+    listing_id: UUID
+
+DeleteListingById = Callable[[DeleteListingCommand], Awaitable[Listing | None]]

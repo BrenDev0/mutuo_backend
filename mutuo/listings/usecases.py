@@ -1,8 +1,9 @@
 from uuid import UUID
 
 from mutuo.schemas import Pagination
+from mutuo.exceptions import NotfoundException
 
-from .types import CreateListingFn, GetListingsByUserIdFn, UserListingQuery
+from .types import CreateListingFn, GetListingsByUserIdFn, UserListingQuery, DeleteListingById, DeleteListingCommand
 from .schemas import CreateListingRequest, ListingPublic, ListingFilters, ListingPage
 from .mappers import listing_to_public, create_request_to_partial
 
@@ -48,5 +49,25 @@ async def get_user_owned_listings(
             for listing in listings
         ]
     )
+
+
+async def handle_delete_listing(
+    user_id: UUID,
+    listing_id: UUID,
+    delete_listing_by_id: DeleteListingById
+) -> ListingPublic:
+    command = DeleteListingCommand(
+        user_id=user_id,
+        listing_id=listing_id
+    )
+
+    deleted_listing = await delete_listing_by_id(command)
+
+    if not deleted_listing:
+        raise NotfoundException("Listing not found")
+    
+    return listing_to_public(deleted_listing)
+
+
 
 

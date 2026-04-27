@@ -79,7 +79,7 @@ async def test_success(
     assert hasattr(called_query, "offset")
     assert hasattr(called_query, "limit")
     assert hasattr(called_query, "filters")
-    assert getattr(called_query, "filters") == None
+    assert getattr(called_query, "filters") is None
     assert getattr(called_query, "user_id") == user_id
 
 
@@ -113,5 +113,5 @@ async def test_no_results(
     assert hasattr(called_query, "offset")
     assert hasattr(called_query, "limit")
     assert hasattr(called_query, "filters")
-    assert getattr(called_query, "filters") == None
+    assert getattr(called_query, "filters") is None
     assert getattr(called_query, "user_id") == user_id
