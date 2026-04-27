@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from mutuo.database.dependencies import get_db_session

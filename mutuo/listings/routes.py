@@ -50,6 +50,16 @@ async def listings_owners_collection(
     user: UserPublic = Depends(user_is_owner),
     get_by_user_id: GetListingsByUserIdFn = Depends(provide_get_listings_by_user_id)
 ):
+    """
+    Get Listings uploaded by user
+
+    ### Args: 
+    - **pagination**: dictionary representing a page of listings
+    - **filters**: Optional filter values(can include more than one)
+    
+    ### Returns:
+    - **200**: Listings pagination schema ('items' in pagination schema)
+    """
     return await get_user_owned_listings(
         user_id=user.user_id,
         pagination=pagination,
@@ -59,11 +69,23 @@ async def listings_owners_collection(
 
 
 @router.delete("/{listing_id}", status_code=200, response_model=ListingPublic)
-async def listings_delete(
+async def listings_delete_by_id(
     listing_id: UUID,
     user: UserPublic = Depends(user_is_owner),
     delete_listing_by_id: DeleteListingById = Depends(provide_delete_listing_by_id)
 ):
+    """
+    Delete litsing by id
+
+    ### Params:
+    - **listingId**: id of listing to be deleted
+
+    ### Returns:
+    - **200"": public schema of deleted listing
+
+    ### Raises: 
+    -**404 NOT FOUND**: if listing matching id is not found in database
+    """
     return await handle_delete_listing(
         user_id=user.user_id,
         listing_id=listing_id,
