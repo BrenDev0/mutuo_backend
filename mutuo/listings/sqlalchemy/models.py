@@ -1,7 +1,6 @@
 import uuid
-from sqlalchemy import String, ForeignKey, Integer, Float
+from sqlalchemy import String, ForeignKey, Integer, Float, UUID
 from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy.dialects.postgresql import UUID
 
 from mutuo.database.sqlalchemy.models import Base, TimeStampMixin
 
