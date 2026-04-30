@@ -1,0 +1,40 @@
+from uuid import UUID
+
+from mutuo.listings.types import GetListingsByUserIdFn, UserListingQuery
+from mutuo.exceptions import NotfoundException
+
+from .schemas import CreateContractRequest, ContractStatus
+from .types import CreateContractFn
+from .models import ContractPartial
+from .mappers import contract_to_public
+
+
+
+async def handle_create_contract(
+    contract_data: CreateContractRequest,
+    user_id: UUID,
+    get_users_listings: GetListingsByUserIdFn,
+    create_contract: CreateContractFn,
+):
+    listing_query = UserListingQuery(
+        user_id=user_id,
+        offset=0,
+        limit=1,
+        filters={"listing_id": contract_data.listing_id}
+    )
+
+    listings = await get_users_listings(listing_query)
+
+    if not listings:
+        raise NotfoundException("Listing not found")
+    
+
+    contract_in = ContractPartial(
+        status=ContractStatus.PENDING,
+        **contract_data.model_dump(by_alias=False)
+    )
+
+    new_contract = await create_contract(contract_in)
+
+    return contract_to_public(new_contract)
+    
