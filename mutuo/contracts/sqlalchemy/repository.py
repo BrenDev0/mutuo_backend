@@ -3,13 +3,13 @@ from uuid import UUID
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import Contract
+from ..models import Contract, ContractPartial
 from .mappers import domain_partial_to_row, row_to_domain
 from .models import ContractRow
 
 async def create(
     db: AsyncSession,
-    contract_in: Contract
+    contract_in: ContractPartial
 )-> Contract:
     row = domain_partial_to_row(contract_in)
     db.add(row)
@@ -17,7 +17,6 @@ async def create(
     await db.refresh(row)
 
     return row_to_domain(row)
-
 
 
 async def delete_by_id(
