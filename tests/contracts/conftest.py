@@ -5,6 +5,15 @@ from datetime import datetime
 
 from mutuo.contracts.models import Contract
 from mutuo.listings.models import Listing
+from mutuo.contracts.schemas import CreateContractRequest, ContractPublic
+
+
+@pytest.fixture
+def mock_create_request():
+    return CreateContractRequest(
+        listing_id=uuid4(),
+        expiration=datetime.now()
+    )
 
 
 @pytest.fixture
@@ -42,4 +51,14 @@ def mock_listing():
         price=15000,
         status="DISPONIBLE",
         created_at=datetime.now()
+    )
+
+
+@pytest.fixture
+def mock_contract_public():
+    return ContractPublic(
+        contract_id=uuid4(),
+        listing_id=uuid4(),
+        status="ACTIVO",
+        expiration=datetime.now()
     )

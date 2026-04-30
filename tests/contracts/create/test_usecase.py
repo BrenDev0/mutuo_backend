@@ -7,13 +7,6 @@ from mutuo.contracts.models import ContractPartial
 from mutuo.exceptions import NotfoundException
 from mutuo.listings.types import UserListingQuery
 
-@pytest.fixture
-def mock_create_request():
-    return CreateContractRequest(
-        listing_id=uuid4(),
-        expiration=datetime.now()
-    )
-
 
 @pytest.mark.asyncio
 async def test_success(
