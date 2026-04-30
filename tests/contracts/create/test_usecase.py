@@ -1,8 +1,7 @@
 import pytest 
 from uuid import uuid4
-from datetime import datetime
 from mutuo.contracts.usecases import handle_create_contract
-from mutuo.contracts.schemas import CreateContractRequest, ContractPublic
+from mutuo.contracts.schemas import ContractPublic
 from mutuo.contracts.models import ContractPartial
 from mutuo.exceptions import NotfoundException
 from mutuo.listings.types import UserListingQuery
