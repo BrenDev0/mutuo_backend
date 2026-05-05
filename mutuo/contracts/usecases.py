@@ -3,8 +3,8 @@ from uuid import UUID
 from mutuo.listings.types import GetListingsByUserIdFn, UserListingQuery
 from mutuo.exceptions import NotfoundException
 
-from .schemas import CreateContractRequest, ContractStatus
-from .types import CreateContractFn
+from .schemas import CreateContractRequest, ContractStatus, ContractPublic
+from .types import CreateContractFn, DeleteContractByIdFn, GetContractByIdFn, SelectContractByIdQuery
 from .models import ContractPartial
 from .mappers import contract_to_public
 
@@ -15,7 +15,7 @@ async def handle_create_contract(
     user_id: UUID,
     get_users_listings: GetListingsByUserIdFn,
     create_contract: CreateContractFn,
-):
+) -> ContractPublic:
     listing_query = UserListingQuery(
         user_id=user_id,
         offset=0,
@@ -37,4 +37,26 @@ async def handle_create_contract(
     new_contract = await create_contract(contract_in)
 
     return contract_to_public(new_contract)
+    
+
+
+async def handle_delete_contract(
+    contract_id: UUID,
+    user_id: UUID,
+    get_contract_by_id: GetContractByIdFn,
+    delete_contract: DeleteContractByIdFn
+) -> ContractPublic:
+    query = SelectContractByIdQuery(
+        user_id=user_id,
+        contract_id=contract_id
+    )
+
+    contract = await get_contract_by_id(query)
+
+    if not contract:
+        raise NotfoundException("Contract not found")
+    
+    deleted_contract = await delete_contract(contract_id)
+
+    return contract_to_public(deleted_contract)
     
