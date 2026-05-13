@@ -8,8 +8,8 @@ class Contract:
     contract_id: UUID
     status: str
     listing_id: UUID
-    created_at: datetime
     expiration: datetime
+    created_at: datetime
 
 
 @dataclass(frozen=True)

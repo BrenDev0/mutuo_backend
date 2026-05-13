@@ -20,3 +20,4 @@ class ContractPublic(MutuoSchemaBase):
     listing_id: UUID
     status: str
     expiration: datetime
+    created_at: datetime

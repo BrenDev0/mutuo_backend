@@ -58,5 +58,7 @@ async def handle_delete_contract(
     
     deleted_contract = await delete_contract(contract_id)
 
+    assert deleted_contract is not None
+
     return contract_to_public(deleted_contract)
     
