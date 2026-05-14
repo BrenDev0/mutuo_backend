@@ -103,6 +103,6 @@ async def test_success_session_exists(
     mock_create_session.assert_not_called()
 
     
-    mock_response.asser_not_called()
+    mock_response.assert_not_called()
     
     
