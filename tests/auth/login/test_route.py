@@ -68,7 +68,7 @@ async def test_success_create_session(
 @pytest.mark.asyncio
 @patch("mutuo.auth.routes.create_session")
 @patch("mutuo.auth.routes.login")
-async def test_success_create_session(
+async def test_success_session_exists(
     mock_login,
     mock_create_session,
     mock_user_public,
