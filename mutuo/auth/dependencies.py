@@ -15,7 +15,7 @@ def get_session_id(
     request: Request
 ):
     session_id = request.cookies.get("session_id")
-
+    
     if not session_id:
         raise HTTPException(status_code=400, detail="Unauthorized")
     
@@ -28,10 +28,10 @@ async def get_current_user(
     get_by_id: GetByIdFn = Depends(provide_get_by_id)
 ):
     cache_store: CacheStore = request.app.state.cache_store
-    session = await cache_store.get(str(session_id))
+    session = await cache_store.get(f"session:{session_id}")
 
     if session is None:
-        raise HTTPException(status_code=400, detail="Unauthorized")
+        raise HTTPException(status_code=401, detail="Unauthorized")
     
     session = SessionSchema(**session)
     
@@ -42,7 +42,7 @@ async def get_current_user(
         user = await get_by_id(session.user_id)
 
         if not user:
-            raise HTTPException(status_code=400, detail="Unauthorized")
+            raise HTTPException(status_code=401, detail="Unauthorized")
         
         user_public = user_to_public(
             user=user,
@@ -54,6 +54,9 @@ async def get_current_user(
             value=user_public.model_dump(mode="json"),
             expire_seconds=60*5
         )
+        
+    else:
+        user_public = UserPublic(**user_cache)
 
     return user_public
 

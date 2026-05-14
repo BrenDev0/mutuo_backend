@@ -30,7 +30,7 @@ async def get_user_owned_listings(
     offset = (pagination.page_number - 1) * pagination.items_per_page
     limit = pagination.items_per_page
 
-    cleaned_filters = filters.model_dump(exclude_none=True) if filters else None
+    cleaned_filters = filters.model_dump(exclude_none=True, by_alias=False) if filters else None
 
     query = UserListingQuery(
         user_id=user_id,
@@ -40,8 +40,7 @@ async def get_user_owned_listings(
     )
     
     listings = await get_by_user_id(query)
-
-
+    
     return ListingPage(
         **pagination.model_dump(),
         items=[

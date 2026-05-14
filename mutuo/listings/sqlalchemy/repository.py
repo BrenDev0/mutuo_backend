@@ -39,10 +39,9 @@ async def get_by_user_id(
     filters: dict[str, Any] | None = None
 ) -> list[Listing]:
     stmt = select(ListingRow).where(ListingRow.user_id == user_id)
-
     if filters:
         for k, v in filters.items():
-            stmt = stmt.where(getattr(Listing, k) == v)
+            stmt = stmt.where(getattr(ListingRow, k) == v)
 
     stmt = stmt.limit(limit).offset(offset)
 
