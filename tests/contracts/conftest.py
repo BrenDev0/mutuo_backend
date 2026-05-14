@@ -27,6 +27,16 @@ def mock_get_users_listings():
 
 
 @pytest.fixture
+def mock_delete_contract_by_id():
+    return AsyncMock()
+
+
+@pytest.fixture
+def mock_get_contract_by_id():
+    return AsyncMock()
+
+
+@pytest.fixture
 def mock_contract():
     return Contract(
         contract_id=uuid4(),
@@ -60,5 +70,6 @@ def mock_contract_public():
         contract_id=uuid4(),
         listing_id=uuid4(),
         status="ACTIVO",
-        expiration=datetime.now()
+        expiration=datetime.now(),
+        created_at=datetime.now()
     )
