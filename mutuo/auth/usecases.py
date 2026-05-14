@@ -91,7 +91,7 @@ async def create_session(
             expire_seconds=settings.SESSION_MAX_AGE
         ),
         cache_store.set(
-            key=f"user:cache:{user.user_id}",
+            key=f"cache:user:{user.user_id}",
             value=user_cache,
             expire_seconds=settings.USER_CACHE_MAX_AGE
         )

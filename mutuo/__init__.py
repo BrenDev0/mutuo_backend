@@ -1,2 +1,3 @@
-from mutuo.users.models import User #noqa: F401
-from mutuo.listings.models import Listing #noqa: F401
+from mutuo.users.sqlalchemy.models import UserRow #noqa: F401
+from mutuo.listings.sqlalchemy.models import ListingRow #noqa: F401
+from mutuo.contracts.sqlalchemy.models import ContractRow #noqa: F401

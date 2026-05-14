@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from mutuo.auth.dependencies import user_is_owner
 from mutuo.users.schemas import UserPublic
 from mutuo.schemas import Pagination
@@ -45,8 +45,8 @@ async def listings_create(
 
 @router.get("", status_code=200, response_model=ListingPage)
 async def listings_owners_collection(
-    pagination: Pagination,
-    filters: ListingFilters | None = None,
+    pagination: Pagination = Depends(),
+    filters: ListingFilters = Depends(),
     user: UserPublic = Depends(user_is_owner),
     get_by_user_id: GetListingsByUserIdFn = Depends(provide_get_listings_by_user_id)
 ):
@@ -60,6 +60,10 @@ async def listings_owners_collection(
     ### Returns:
     - **200**: Listings pagination schema ('items' in pagination schema)
     """
+
+    if pagination.page_number == 0:
+        raise HTTPException(status_code=422, detail="page number cannot be 0")
+
     return await get_user_owned_listings(
         user_id=user.user_id,
         pagination=pagination,
