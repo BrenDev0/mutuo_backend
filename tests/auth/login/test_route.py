@@ -10,7 +10,7 @@ from mutuo.auth.schemas import SessionContext
 @pytest.mark.asyncio
 @patch("mutuo.auth.routes.create_session")
 @patch("mutuo.auth.routes.login")
-async def test_success(
+async def test_success_create_session(
     mock_login,
     mock_create_session,
     mock_user_public,
@@ -27,6 +27,7 @@ async def test_success(
     mock_request.state.ip = "1.1.1.1"
     mock_request.headers = {"user-agent": "mock_agent"}
     mock_create_session.return_value = mock_session_id
+    mock_request.cookies.session_id = None
 
    
     result = await auth_login(
@@ -61,4 +62,47 @@ async def test_success(
         httponly=True,
         samesite="lax"
     )
+
+
+
+@pytest.mark.asyncio
+@patch("mutuo.auth.routes.create_session")
+@patch("mutuo.auth.routes.login")
+async def test_success_create_session(
+    mock_login,
+    mock_create_session,
+    mock_user_public,
+    mock_cache_store,
+    mock_request,
+    mock_response,
+    mock_credentials,
+    mock_cryptography,
+    mock_get_user_by_email_hash_fn
+):
+    mock_session_id = uuid4()
+    mock_login.return_value = mock_user_public
+    mock_request.app.state.cache_store = mock_cache_store
+    mock_request.state.ip = "1.1.1.1"
+    mock_request.headers = {"user-agent": "mock_agent"}
+    mock_create_session.return_value = mock_session_id
+    mock_request.cookies.session_id = "12345"
+
+   
+    result = await auth_login(
+        request=mock_request,
+        response=mock_response,
+        data=mock_credentials,
+        get_by_email_hash=mock_get_user_by_email_hash_fn,
+        cryptography=mock_cryptography
+    )
+
+
+
+    assert isinstance(result, UserPublic)
+
+    mock_create_session.assert_not_called()
+
+    
+    mock_response.asser_not_called()
+    
     

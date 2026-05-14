@@ -203,7 +203,7 @@ async def auth_login(
     - **401 UNAUTHORIZED**: if incorrect email or password provided
     """
 
-    session_id = request.cookies.get("session_id", None)
+    session_id = getattr(request.cookies, "session_id")
 
     user = await login(
         cryptography=cryptography,
