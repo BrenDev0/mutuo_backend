@@ -48,7 +48,7 @@ class ListingPage(Pagination):
 
 
 class ListingFilters(MutuoSchemaBase):
-    property_type: str | None
+    property_type: PropertyType | None
     name: str | None = None
     beds: str | None = None
     baths: str | None = None
